@@ -59,6 +59,11 @@ class SeriesEntry:
     # (entries->season) gebraucht, damit Doubleheader nicht verloren gehen
     # (Sprint 3 FIX fuer Warm-Start auf realen Plaenen mit DH).
     day_game_counts: Tuple[int, ...] = ()
+    # Nacht-Härtung 2026-06-11 (P2): dh_type je Serientag (""=kein DH, "S"/"Y")
+    # — reine Metadaten-Durchreichung, damit der Roundtrip entries->season den
+    # MLB-doubleHeader-Typ ERHAELT und V(C)(14) Satz 2 (max. 1 Home-Split-DH)
+    # auf SA-Output messbar ist (vorher vakuos, weil der Typ verloren ging).
+    day_dh_types: Tuple[str, ...] = ()
 
     def days_occupied(self) -> Set[int]:
         return set(range(self.start_day, self.start_day + self.length))
@@ -256,10 +261,14 @@ def _entry_from_games(idx: int, games: List[Game], cfg: GeneratorConfig) -> Seri
     # Spiele pro Tag erfassen (Doubleheader = 2 am selben Tag), damit der
     # Roundtrip entries->season die DH erhaelt.
     per_day: Dict[int, int] = {}
+    dh_per_day: Dict[int, str] = {}
     for g in games:
         off = (g.date - games[0].date).days
         per_day[off] = per_day.get(off, 0) + 1
+        if g.doubleheader_seq > 0 and g.dh_type:
+            dh_per_day[off] = g.dh_type
     day_game_counts = tuple(per_day.get(off, 1) for off in range(num_days))
+    day_dh_types = tuple(dh_per_day.get(off, "") for off in range(num_days))
     return SeriesEntry(
         idx=idx,
         home=games[0].home,
@@ -267,6 +276,7 @@ def _entry_from_games(idx: int, games: List[Game], cfg: GeneratorConfig) -> Seri
         length=num_days,
         start_day=start_day,
         day_game_counts=day_game_counts,
+        day_dh_types=day_dh_types,
     )
 
 
@@ -276,15 +286,19 @@ def _entries_to_season(entries: List[SeriesEntry], cfg: GeneratorConfig,
     pk = 2_000_000
     for e in entries:
         counts = e.day_game_counts or tuple([1] * e.length)
+        dh_types = e.day_dh_types or tuple([""] * e.length)
         for off in range(e.length):
             d = cfg.season_start + timedelta(days=e.start_day + off)
             c = counts[off] if off < len(counts) else 1
+            dht = dh_types[off] if off < len(dh_types) else ""
             for seq in range(c):
                 # Doubleheader (c>1): doubleheader_seq = 1,2; sonst 0.
+                # dh_type wird durchgereicht (P2: V(C)(14)-Satz-2 messbar).
                 games.append(Game(game_pk=pk, date=d, home=e.home, away=e.away,
                                   venue=e.home,
                                   doubleheader_seq=(seq + 1 if c > 1 else 0),
-                                  game_type="R"))
+                                  game_type="R",
+                                  dh_type=(dht if c > 1 else "")))
                 pk += 1
     games.sort(key=lambda g: (g.date, g.game_pk))
     return Season(season=cfg.season, games=games,

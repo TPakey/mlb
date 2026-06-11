@@ -482,3 +482,45 @@ def test_tv_pins_enforced_and_conflicts_detected(tbi):
     rules = {x.rule for x in v}
     assert "TV-PIN" in rules               # Pin 19:00, zugewiesen 13:00
     assert "TV-PIN/V(C)(8)" in rules       # 19:00 > Grenze (BOS->SEA ~6h Flug)
+
+
+# ---------- Nacht-Härtung P2: dh_type durch den SA-Roundtrip ----------
+
+def test_dh_type_survives_sa_roundtrip():
+    """V(C)(14)-Satz-2 ist auf SA-Output nicht mehr vakuos: alle GETYPTEN
+    DH-Tage (beide Spiele am Tag, Typ S/Y) ueberleben entries->season
+    typgleich. Dokumentierte, vorbestehende Grenzen: (1) 'Halb-DHs' (nur 1
+    gespieltes Spiel mit seq>0, z. B. ATL 2024-07-24) verlieren seq/typ —
+    das tat der Roundtrip schon immer; (2) von statsapi ungetypte
+    2-Spiele-Tage werden als typlose DHs rekonstruiert."""
+    from collections import Counter
+    from src.datasources.local_file import LocalFileAdapter
+    from src.season import detect_all_star_break
+    from src.generator_optimizer import (GeneratorConfig, OptimizerConfig,
+                                         optimize_travel, _season_to_entries,
+                                         _entries_to_season)
+    real = LocalFileAdapter(base_dir=DATA).fetch_season_schedule(2024)
+    cfg = GeneratorConfig(season=2024, season_start=real.season_start,
+                          season_end=real.season_end,
+                          all_star_break=detect_all_star_break(real),
+                          num_search_workers=1, random_seed=42)
+    rt = _entries_to_season(_season_to_entries(real, cfg), cfg, real.all_star_dates)
+
+    def typed_days(s):
+        return Counter((g.date, g.home, g.dh_type) for g in s.games
+                       if g.doubleheader_seq > 0 and g.dh_type)
+    before, after = typed_days(real), typed_days(rt)
+    # Halb-DH-Tage (nur 1 Spiel am Tag) sind die dokumentierte Ausnahme:
+    full_before = Counter({k: n for k, n in before.items() if n >= 2})
+    assert full_before == after, (before - after, after - before)
+    assert sum(after.values()) >= 56          # 28 getypte DH-Tage x 2 Spiele
+    # Und durch die SA hindurch (50k Iter): Typen bleiben am Plan
+    cfg2 = GeneratorConfig(season=2024, season_start=real.season_start,
+                           season_end=real.season_end,
+                           all_star_break=detect_all_star_break(real),
+                           num_search_workers=1, random_seed=42,
+                           enforce_fatigue_constraints=True)
+    out, _ = optimize_travel(real, load_teams(), cfg2,
+                             OptimizerConfig(iterations=50_000, move_mix_geo=0.35,
+                                             seed=42, fatigue_lambda=1e6))
+    assert sum(1 for g in out.games if g.dh_type) >= 56
