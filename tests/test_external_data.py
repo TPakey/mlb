@@ -570,3 +570,23 @@ def test_envelope_guard_in_measure_original():
         assert rep.max_consecutive_km <= 4350.0
     src = (ROOT / "tools" / "update_external_data.py").read_text(encoding="utf-8")
     assert "ENVELOPE FALSIFIZIERT" in src    # Wache ist verdrahtet
+
+
+# ---------- Nacht-Härtung Schwachstellensuche: Gate ohne Venue-Events ----------
+
+def test_gate_loads_venue_events_by_default():
+    """Fund A (2026-06-11 nachts): Pareto-/Whatif-/Disruption-/api-Gates riefen
+    publishable_report OHNE events auf → VENUE-AVAIL (hart!) griff dort nicht;
+    ein auf einen River-Cats-Tag verschobenes OAK-Heimspiel passierte das Gate
+    (vorher gemessen: PASS). Jetzt lädt das Gate die Belegungen automatisch."""
+    from datetime import date as _d
+    from src.season import Game, Season
+    from src.publish_gate import publishable_report
+    bl = Season(season=2026, games=[Game(1, _d(2026, 4, 6), "OAK", "SEA", "OAK")],
+                season_start=_d(2026, 3, 25), season_end=_d(2026, 9, 27))
+    out = Season(season=2026, games=[Game(1, _d(2026, 4, 8), "OAK", "SEA", "OAK")],
+                 season_start=_d(2026, 3, 25), season_end=_d(2026, 9, 27))
+    g = publishable_report(out, baseline=bl)            # ohne events!
+    assert not g.is_publishable and "VENUE-AVAIL" in g.new_hard_failures
+    # Expliziter Opt-out bleibt moeglich (Forschung):
+    assert publishable_report(out, baseline=bl, events=[]).is_publishable

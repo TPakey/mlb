@@ -218,6 +218,13 @@ def run_generate(args) -> int:
                              gate.summary())
                 return 1
     else:
+        # Nacht-Härtung (Fund B): auch der from-scratch-Zweig plant mit den
+        # harten Stadion-Belegungen (vorher fing nur das Gate hinterher den
+        # Konflikt — der Generator konnte OAK auf River-Cats-Tage legen).
+        from .event_conflicts import (load_local_events,
+                                      stadium_bookings_to_blackout_days)
+        fs_blackouts = stadium_bookings_to_blackout_days(
+            load_local_events(), DEFAULT_SEASON_START, DEFAULT_SEASON_END)
         cfg = GeneratorConfig(
             season=args.season,
             season_start=DEFAULT_SEASON_START,
@@ -226,6 +233,7 @@ def run_generate(args) -> int:
             max_solver_time_seconds=args.solver_time,
             num_search_workers=1,
             random_seed=args.seed,
+            home_blackout_days=fs_blackouts,
             # Offizielle Saison-Generierung: hohes Travel-Budget fuer den
             # bestmoeglichen Plan (GeneratorConfig-Default ist bewusst moderat fuer
             # interaktive Pfade). Per --travel-iterations ueberschreibbar.

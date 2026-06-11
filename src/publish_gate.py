@@ -46,6 +46,26 @@ class UnpublishableScheduleError(RuntimeError):
     """Ein Plan hat das Publish-Gate nicht bestanden (harte Regelverstöße)."""
 
 
+_EVENTS_CACHE: list = []
+
+
+def _default_events():
+    """Stadion-Belegungen (local_events.json), prozessweit gecacht.
+
+    Robust: schlägt das Laden fehl, läuft das Gate ohne Venue-Check weiter
+    (geloggt) — das Gate selbst darf nie an einem Daten-Lesefehler sterben."""
+    if not _EVENTS_CACHE:
+        try:
+            from .event_conflicts import load_local_events
+            _EVENTS_CACHE.append(load_local_events())
+        except Exception as exc:  # pragma: no cover
+            import logging
+            logging.getLogger("mlb.publish_gate").warning(
+                "Venue-Events nicht ladbar (%s) — Gate ohne VENUE-AVAIL!", exc)
+            _EVENTS_CACHE.append([])
+    return _EVENTS_CACHE[0]
+
+
 @dataclass(frozen=True)
 class PublishGate:
     """Ergebnis der Abnahmeprüfung."""
@@ -109,10 +129,19 @@ def publishable_report(
 
     ``baseline``: der Input-Plan eines Warm-Starts (as-played). Ohne Baseline
     gilt der strikte Maßstab (Original-/green-field-Plan).
-    ``events``: LocalEvent-Liste → aktiviert den harten VENUE-AVAIL-Check
-    (Review-Runde 2, Punkt 2 — vorher war die harte Regel im Gate nie aktiv).
+    ``events``: LocalEvent-Liste für den harten VENUE-AVAIL-Check. Nacht-
+    Härtung 2026-06-11 (Schwachstellensuche, Fund A): ``events=None`` lädt die
+    Stadion-Belegungen jetzt AUTOMATISCH aus ``data/local_events.json`` —
+    vorher liefen vier Gate-Pfade (Pareto-Punkte, What-if, Disruption,
+    api /schedule/generate) faktisch OHNE Venue-Regel: ein Plan mit
+    OAK-Heimspiel auf einem River-Cats-Tag passierte das Gate (gemessen,
+    Test test_gate_loads_venue_events_by_default). Explizites ``events=[]``
+    deaktiviert den Check bewusst.
     """
     from .compliance import compliance_report
+
+    if events is None:
+        events = _default_events()
 
     if teams_by_id is None:
         from .data_loader import load_teams, teams_by_id as _tbi
