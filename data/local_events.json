@@ -1,0 +1,1274 @@
+{
+ "_source": "docs/LOCAL_EVENTS_RESEARCH.md",
+ "_season": 2026,
+ "_format": "Jedes Event hat: city (Stadtname matched mit teams.json), team_ids (direkt betroffene MLB-Teams), name, start_date, end_date, severity (1-5), category, source_url.",
+ "_severity_scale": {
+  "1": "Leichte städtische Aktivität (kleine Festivals, normale Marathons < 10k)",
+  "2": "Moderate Konkurrenz (Stadt-Events, Theaterveranstaltungen)",
+  "3": "Starke Konkurrenz (große Sportevents, State Fairs, mehrwöchige Festivals)",
+  "4": "Massive Konkurrenz (Marathons 50k+, Comic-Con, Outside Lands, Lollapalooza, F1)",
+  "5": "Extreme Konkurrenz (NYC-/Boston-Marathon, US Open Tennis, Cherry-Blossom-Peak)"
+ },
+ "events": [
+  {
+   "city": "Washington",
+   "team_ids": [
+    "WSN"
+   ],
+   "name": "National Cherry Blossom Festival",
+   "start_date": "2026-03-20",
+   "end_date": "2026-04-12",
+   "severity": 4,
+   "category": "tourism",
+   "source": "nationalcherryblossomfestival.org"
+  },
+  {
+   "city": "Phoenix",
+   "team_ids": [
+    "ARI"
+   ],
+   "name": "Arizona Renaissance Festival (Saisonstart-Überlapp)",
+   "start_date": "2026-03-26",
+   "end_date": "2026-03-29",
+   "severity": 2,
+   "category": "festival",
+   "source": "visitphoenix.com"
+  },
+  {
+   "city": "Atlanta",
+   "team_ids": [
+    "ATL"
+   ],
+   "name": "AJC Peachtree Road Race",
+   "start_date": "2026-07-04",
+   "end_date": "2026-07-04",
+   "severity": 3,
+   "category": "race",
+   "source": "ajc.com/peachtree"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Boston Marathon (Patriots' Day)",
+   "start_date": "2026-04-20",
+   "end_date": "2026-04-20",
+   "severity": 5,
+   "category": "race",
+   "source": "baa.org"
+  },
+  {
+   "city": "Baltimore",
+   "team_ids": [
+    "BAL"
+   ],
+   "name": "Preakness Stakes (Laurel Park MD)",
+   "start_date": "2026-05-16",
+   "end_date": "2026-05-16",
+   "severity": 2,
+   "category": "sport",
+   "source": "twinspires.com",
+   "note": "2026 in Laurel Park wegen Pimlico-Renovierung, deshalb gedämpfter Stadt-Effekt"
+  },
+  {
+   "city": "Bronx",
+   "team_ids": [
+    "NYY",
+    "NYM"
+   ],
+   "name": "NYC Marathon (50. Auflage)",
+   "start_date": "2026-11-01",
+   "end_date": "2026-11-01",
+   "severity": 5,
+   "category": "race",
+   "source": "nyrr.org",
+   "note": "Nach regulärer MLB-Saison; nur relevant bei Postseason-Heimspielen"
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "US Open Tennis",
+   "start_date": "2026-08-23",
+   "end_date": "2026-09-13",
+   "severity": 5,
+   "category": "sport",
+   "source": "usopen.org",
+   "note": "Direkt am Mets-Stadion (USTA Billie Jean King NTC + Citi Field)"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC",
+    "CWS"
+   ],
+   "name": "Lollapalooza",
+   "start_date": "2026-07-30",
+   "end_date": "2026-08-02",
+   "severity": 4,
+   "category": "festival",
+   "source": "cbsnews.com/chicago"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC",
+    "CWS"
+   ],
+   "name": "Chicago Air and Water Show",
+   "start_date": "2026-08-15",
+   "end_date": "2026-08-16",
+   "severity": 3,
+   "category": "showcase",
+   "source": "choosechicago.com"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC",
+    "CWS"
+   ],
+   "name": "Bank of America Chicago Marathon",
+   "start_date": "2026-10-11",
+   "end_date": "2026-10-11",
+   "severity": 4,
+   "category": "race",
+   "source": "chicagomarathon.com"
+  },
+  {
+   "city": "Cleveland",
+   "team_ids": [
+    "CLE"
+   ],
+   "name": "Cleveland Marathon",
+   "start_date": "2026-05-16",
+   "end_date": "2026-05-16",
+   "severity": 2,
+   "category": "race",
+   "source": "usamarathonlist.com"
+  },
+  {
+   "city": "Cincinnati",
+   "team_ids": [
+    "CIN"
+   ],
+   "name": "Flying Pig Marathon",
+   "start_date": "2026-05-03",
+   "end_date": "2026-05-03",
+   "severity": 3,
+   "category": "race",
+   "source": "flyingpigmarathon.com"
+  },
+  {
+   "city": "Detroit",
+   "team_ids": [
+    "DET"
+   ],
+   "name": "Rocket Classic (PGA Tour)",
+   "start_date": "2026-07-27",
+   "end_date": "2026-08-02",
+   "severity": 2,
+   "category": "sport",
+   "source": "pgatour.com"
+  },
+  {
+   "city": "Miami",
+   "team_ids": [
+    "MIA"
+   ],
+   "name": "Formula 1 Crypto.com Miami Grand Prix",
+   "start_date": "2026-05-01",
+   "end_date": "2026-05-03",
+   "severity": 4,
+   "category": "sport",
+   "source": "formula1.com",
+   "note": "Hard Rock Stadium komplex, in Miami Gardens (~30 min vom Marlins-Stadion)"
+  },
+  {
+   "city": "Milwaukee",
+   "team_ids": [
+    "MIL"
+   ],
+   "name": "Summerfest Weekend 1",
+   "start_date": "2026-06-18",
+   "end_date": "2026-06-20",
+   "severity": 4,
+   "category": "festival",
+   "source": "summerfest.com",
+   "note": "Henry Maier Festival Park, direkt am Stadion-Komplex"
+  },
+  {
+   "city": "Milwaukee",
+   "team_ids": [
+    "MIL"
+   ],
+   "name": "Summerfest Weekend 2",
+   "start_date": "2026-06-25",
+   "end_date": "2026-06-27",
+   "severity": 4,
+   "category": "festival",
+   "source": "summerfest.com"
+  },
+  {
+   "city": "Milwaukee",
+   "team_ids": [
+    "MIL"
+   ],
+   "name": "Summerfest Weekend 3",
+   "start_date": "2026-07-02",
+   "end_date": "2026-07-04",
+   "severity": 4,
+   "category": "festival",
+   "source": "summerfest.com"
+  },
+  {
+   "city": "Minneapolis",
+   "team_ids": [
+    "MIN"
+   ],
+   "name": "Minnesota State Fair",
+   "start_date": "2026-08-27",
+   "end_date": "2026-09-07",
+   "severity": 4,
+   "category": "fair",
+   "source": "mnstatefair.org",
+   "note": "St. Paul, 12 Tage bis Labor Day"
+  },
+  {
+   "city": "Philadelphia",
+   "team_ids": [
+    "PHI"
+   ],
+   "name": "Philadelphia Marathon",
+   "start_date": "2026-11-22",
+   "end_date": "2026-11-22",
+   "severity": 3,
+   "category": "race",
+   "source": "philadelphiamarathon.com",
+   "note": "Nach regulärer MLB-Saison; nur Postseason relevant"
+  },
+  {
+   "city": "Pittsburgh",
+   "team_ids": [
+    "PIT"
+   ],
+   "name": "NFL Draft 2026",
+   "start_date": "2026-04-23",
+   "end_date": "2026-04-25",
+   "severity": 4,
+   "category": "sport",
+   "source": "nfl.com",
+   "note": "~600k erwartete Besucher in Pittsburgh"
+  },
+  {
+   "city": "Seattle",
+   "team_ids": [
+    "SEA"
+   ],
+   "name": "Bumbershoot Arts & Music Festival",
+   "start_date": "2026-09-05",
+   "end_date": "2026-09-06",
+   "severity": 3,
+   "category": "festival",
+   "source": "bumbershoot.com"
+  },
+  {
+   "city": "Arlington",
+   "team_ids": [
+    "TEX"
+   ],
+   "name": "State Fair of Texas (Dallas)",
+   "start_date": "2026-09-25",
+   "end_date": "2026-10-18",
+   "severity": 4,
+   "category": "fair",
+   "source": "bigtex.com",
+   "note": "24 Tage, Fair Park Dallas; Cotton Bowl + Red River Rivalry Football innerhalb des Zeitraums"
+  },
+  {
+   "city": "Los Angeles",
+   "team_ids": [
+    "LAD"
+   ],
+   "name": "LA Marathon (Start am Dodger Stadium)",
+   "start_date": "2026-03-08",
+   "end_date": "2026-03-08",
+   "severity": 5,
+   "category": "race",
+   "source": "mccourtfoundation.org",
+   "note": "Vor offiziellem MLB-Start, aber Stadion-Operative-Konflikt"
+  },
+  {
+   "city": "Los Angeles",
+   "team_ids": [
+    "LAD",
+    "LAA"
+   ],
+   "name": "Coachella Weekend 1",
+   "start_date": "2026-04-10",
+   "end_date": "2026-04-12",
+   "severity": 3,
+   "category": "festival",
+   "source": "coachella.com",
+   "note": "Indio CA, indirekter LA-Region-Effekt"
+  },
+  {
+   "city": "Los Angeles",
+   "team_ids": [
+    "LAD",
+    "LAA"
+   ],
+   "name": "Coachella Weekend 2",
+   "start_date": "2026-04-17",
+   "end_date": "2026-04-19",
+   "severity": 3,
+   "category": "festival",
+   "source": "coachella.com"
+  },
+  {
+   "city": "San Diego",
+   "team_ids": [
+    "SDP"
+   ],
+   "name": "San Diego Comic-Con International",
+   "start_date": "2026-07-22",
+   "end_date": "2026-07-26",
+   "severity": 5,
+   "category": "convention",
+   "source": "comic-con.org",
+   "note": "Stadtweite Hotel-/Verkehrs-Disruption; Petco Park nahe Convention Center"
+  },
+  {
+   "city": "San Francisco",
+   "team_ids": [
+    "SFG"
+   ],
+   "name": "Bay to Breakers",
+   "start_date": "2026-05-17",
+   "end_date": "2026-05-17",
+   "severity": 4,
+   "category": "race",
+   "source": "nbcbayarea.com"
+  },
+  {
+   "city": "San Francisco",
+   "team_ids": [
+    "SFG"
+   ],
+   "name": "Outside Lands Festival",
+   "start_date": "2026-08-07",
+   "end_date": "2026-08-09",
+   "severity": 4,
+   "category": "festival",
+   "source": "musicfestivalwizard.com"
+  },
+  {
+   "city": "Atlanta",
+   "team_ids": [
+    "ATL"
+   ],
+   "name": "TOUR Championship Golf (East Lake)",
+   "start_date": "2026-08-27",
+   "end_date": "2026-08-30",
+   "severity": 2,
+   "category": "sport",
+   "source": "pgatour.com"
+  },
+  {
+   "city": "Cincinnati",
+   "team_ids": [
+    "CIN"
+   ],
+   "name": "Findlay Market Opening Day Parade (107. Auflage)",
+   "start_date": "2026-03-26",
+   "end_date": "2026-03-26",
+   "severity": 4,
+   "category": "tradition",
+   "source": "findlaymarketparade.com",
+   "note": "Tradition seit 1876 — Opening Day in Cincinnati ist Stadtfeiertag. Heimspiel POSITIV (Tradition), Auswärts-Datum wäre NEGATIV (bricht Tradition)."
+  },
+  {
+   "city": "Atlanta",
+   "team_ids": [
+    "ATL"
+   ],
+   "name": "Music Midtown Festival (Piedmont Park)",
+   "start_date": "2026-09-19",
+   "end_date": "2026-09-20",
+   "severity": 2,
+   "category": "festival",
+   "source": "songkick.com",
+   "note": "Konkrete 2026-Termine TBD; Schätzung basierend auf historischer Mid-September-Tradition"
+  },
+  {
+   "city": "Philadelphia",
+   "team_ids": [
+    "PHI"
+   ],
+   "name": "MLB All-Star Week (Citizens Bank Park als Host)",
+   "start_date": "2026-07-10",
+   "end_date": "2026-07-14",
+   "severity": 5,
+   "category": "mlb_event",
+   "source": "mlb.com/all-star",
+   "note": "HBCU Swingman Classic (10.7.), All-Star Village (11.-14.7.), Futures Game + 3-on-3 (12.7.), Home Run Derby (13.7.), All-Star Game (14.7.). Stadion fest belegt, Stadt überfüllt. All-Star-Break ist 13.-16.7. (Sprint-2.1-Constraint), aber 10.-12.7. liegen DAVOR und können PHI-Heimspiele blockieren."
+  },
+  {
+   "city": "Bronx",
+   "team_ids": [
+    "NYY"
+   ],
+   "name": "Yankee Stadium Konzerte (JAY-Z 30 + JAY-Z 25)",
+   "start_date": "2026-07-10",
+   "end_date": "2026-07-11",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/yankees/ballpark/upcoming-events",
+   "note": "HARTE STADION-BELEGUNG: kein Yankees-Heimspiel an diesen Tagen möglich. Liegt vor All-Star-Break."
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "Citi Field Konzert Noah Kahan (2 Termine)",
+   "start_date": "2026-07-18",
+   "end_date": "2026-07-19",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mets/tickets/concerts",
+   "note": "HARTE STADION-BELEGUNG. Direkt nach All-Star-Break."
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "Citi Field Konzert Fuerza Regida",
+   "start_date": "2026-08-07",
+   "end_date": "2026-08-07",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mets/tickets/concerts",
+   "note": "HARTE STADION-BELEGUNG."
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "Citi Field Konzert My Chemical Romance",
+   "start_date": "2026-08-09",
+   "end_date": "2026-08-09",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mets/tickets/concerts",
+   "note": "HARTE STADION-BELEGUNG."
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Wrigley Field Konzerte Juni (1 Termin)",
+   "start_date": "2026-06-12",
+   "end_date": "2026-06-12",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/cubs/tickets/concerts",
+   "note": "HARTE STADION-BELEGUNG. Wrigley-Konzerte sind hochfrequent, mehrere Wochenenden im Juli."
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Wrigley Field John Mulaney",
+   "start_date": "2026-07-11",
+   "end_date": "2026-07-11",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/cubs/tickets/concerts",
+   "note": "HARTE STADION-BELEGUNG."
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Wrigley Field Noah Kahan (2 Termine, im All-Star-Break)",
+   "start_date": "2026-07-14",
+   "end_date": "2026-07-15",
+   "severity": 4,
+   "category": "stadium_booking",
+   "source": "mlb.com/cubs/tickets/concerts",
+   "note": "Liegt im All-Star-Break (kein Spiel möglich sowieso), daher schwächere Severity."
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Wrigley Field Mumford & Sons (3 Termine)",
+   "start_date": "2026-07-24",
+   "end_date": "2026-07-26",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/cubs/tickets/concerts",
+   "note": "HARTE STADION-BELEGUNG. Wrigley-Konzert-Wochenende."
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-01 (Sutter Health Park)",
+   "start_date": "2025-03-28",
+   "end_date": "2025-03-30",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-02 (Sutter Health Park)",
+   "start_date": "2025-04-15",
+   "end_date": "2025-04-20",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-03 (Sutter Health Park)",
+   "start_date": "2025-04-29",
+   "end_date": "2025-05-04",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-04 (Sutter Health Park)",
+   "start_date": "2025-05-13",
+   "end_date": "2025-05-18",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-05 (Sutter Health Park)",
+   "start_date": "2025-05-27",
+   "end_date": "2025-06-01",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-06 (Sutter Health Park)",
+   "start_date": "2025-06-10",
+   "end_date": "2025-06-15",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-07 (Sutter Health Park)",
+   "start_date": "2025-06-24",
+   "end_date": "2025-06-29",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-08 (Sutter Health Park)",
+   "start_date": "2025-07-01",
+   "end_date": "2025-07-03",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-09 (Sutter Health Park)",
+   "start_date": "2025-07-18",
+   "end_date": "2025-07-20",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-10 (Sutter Health Park)",
+   "start_date": "2025-07-22",
+   "end_date": "2025-07-27",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-11 (Sutter Health Park)",
+   "start_date": "2025-08-05",
+   "end_date": "2025-08-10",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-12 (Sutter Health Park)",
+   "start_date": "2025-08-19",
+   "end_date": "2025-08-24",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-13 (Sutter Health Park)",
+   "start_date": "2025-09-02",
+   "end_date": "2025-09-07",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2025-14 (Sutter Health Park)",
+   "start_date": "2025-09-16",
+   "end_date": "2025-09-21",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2025 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2025.",
+   "note": "cotenant:OAK:2025"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-01 (Sutter Health Park)",
+   "start_date": "2026-03-27",
+   "end_date": "2026-03-29",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-02 (Sutter Health Park)",
+   "start_date": "2026-04-07",
+   "end_date": "2026-04-12",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-03 (Sutter Health Park)",
+   "start_date": "2026-04-21",
+   "end_date": "2026-04-26",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-04 (Sutter Health Park)",
+   "start_date": "2026-05-05",
+   "end_date": "2026-05-10",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-05 (Sutter Health Park)",
+   "start_date": "2026-05-19",
+   "end_date": "2026-05-24",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-06 (Sutter Health Park)",
+   "start_date": "2026-06-02",
+   "end_date": "2026-06-07",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-07 (Sutter Health Park)",
+   "start_date": "2026-06-23",
+   "end_date": "2026-06-28",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-08 (Sutter Health Park)",
+   "start_date": "2026-07-07",
+   "end_date": "2026-07-12",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-09 (Sutter Health Park)",
+   "start_date": "2026-07-21",
+   "end_date": "2026-07-26",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-10 (Sutter Health Park)",
+   "start_date": "2026-08-04",
+   "end_date": "2026-08-09",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-11 (Sutter Health Park)",
+   "start_date": "2026-08-18",
+   "end_date": "2026-08-23",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-12 (Sutter Health Park)",
+   "start_date": "2026-09-01",
+   "end_date": "2026-09-06",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "West Sacramento",
+   "team_ids": [
+    "OAK"
+   ],
+   "name": "Co-Tenant Sacramento River Cats Homestand 2026-13 (Sutter Health Park)",
+   "start_date": "2026-09-15",
+   "end_date": "2026-09-20",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "MLB Stats API schedule?sportId=11&teamId=105&season=2026 (Rating A). venueId-Beleg: 2529. Refresh: tools/fetch_cotenant_calendars. Kreuzvalidiert: 0 Kollisionen mit realem OAK-Plan 2026.",
+   "note": "cotenant:OAK:2026"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Konzert Mumford & Sons (Wrigley)",
+   "start_date": "2026-06-11",
+   "end_date": "2026-06-11",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Wrigley-Community-Meeting Feb 2026 via bleedcubbieblue/wrigleyvillechicago + mlb.com/cubs/tickets (abgerufen 2026-06-11)",
+   "note": "thirdparty:CHC:2026"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Konzert RÜFÜS DU SOL (Wrigley)",
+   "start_date": "2026-06-12",
+   "end_date": "2026-06-12",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Wrigley-Community-Meeting Feb 2026 via bleedcubbieblue/wrigleyvillechicago + mlb.com/cubs/tickets (abgerufen 2026-06-11)",
+   "note": "thirdparty:CHC:2026"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Comedy John Mulaney (Wrigley)",
+   "start_date": "2026-07-11",
+   "end_date": "2026-07-11",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Wrigley-Community-Meeting Feb 2026 via bleedcubbieblue/wrigleyvillechicago + mlb.com/cubs/tickets (abgerufen 2026-06-11)",
+   "note": "thirdparty:CHC:2026"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Konzert Noah Kahan 2x (Wrigley)",
+   "start_date": "2026-07-14",
+   "end_date": "2026-07-15",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Wrigley-Community-Meeting Feb 2026 via bleedcubbieblue/wrigleyvillechicago + mlb.com/cubs/tickets (abgerufen 2026-06-11)",
+   "note": "thirdparty:CHC:2026"
+  },
+  {
+   "city": "Chicago",
+   "team_ids": [
+    "CHC"
+   ],
+   "name": "Savannah Bananas (Wrigley)",
+   "start_date": "2026-07-24",
+   "end_date": "2026-07-26",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Wrigley-Community-Meeting Feb 2026 via bleedcubbieblue/wrigleyvillechicago + mlb.com/cubs/tickets (abgerufen 2026-06-11)",
+   "note": "thirdparty:CHC:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Mumford & Sons (Fenway)",
+   "start_date": "2026-06-22",
+   "end_date": "2026-06-22",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert RÜFÜS DU SOL (Fenway)",
+   "start_date": "2026-06-23",
+   "end_date": "2026-06-23",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Noah Kahan (Fenway, Nacht 1+2)",
+   "start_date": "2026-07-07",
+   "end_date": "2026-07-08",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Noah Kahan (Fenway, Nacht 3+4)",
+   "start_date": "2026-07-10",
+   "end_date": "2026-07-11",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Tim McGraw (Fenway)",
+   "start_date": "2026-07-30",
+   "end_date": "2026-07-30",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Phish 2x (Fenway)",
+   "start_date": "2026-07-31",
+   "end_date": "2026-08-01",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Zac Brown Band (Fenway)",
+   "start_date": "2026-08-02",
+   "end_date": "2026-08-02",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Boston",
+   "team_ids": [
+    "BOS"
+   ],
+   "name": "Konzert Chris Stapleton 2x (Fenway)",
+   "start_date": "2026-08-14",
+   "end_date": "2026-08-15",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "boston.com/Fenway-Konzertkalender 2026 + mlb.com/redsox/tickets/concerts (abgerufen 2026-06-11)",
+   "note": "thirdparty:BOS:2026"
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "Konzert Noah Kahan 2x (Citi Field)",
+   "start_date": "2026-07-18",
+   "end_date": "2026-07-19",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mets/tickets/concerts + concertfix (abgerufen 2026-06-11)",
+   "note": "thirdparty:NYM:2026"
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "Konzert Fuerza Regida (Citi Field)",
+   "start_date": "2026-08-07",
+   "end_date": "2026-08-07",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mets/tickets/concerts + concertfix (abgerufen 2026-06-11)",
+   "note": "thirdparty:NYM:2026"
+  },
+  {
+   "city": "Queens",
+   "team_ids": [
+    "NYM"
+   ],
+   "name": "Konzert My Chemical Romance (Citi Field)",
+   "start_date": "2026-08-09",
+   "end_date": "2026-08-09",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mets/tickets/concerts + concertfix (abgerufen 2026-06-11)",
+   "note": "thirdparty:NYM:2026"
+  },
+  {
+   "city": "Bronx",
+   "team_ids": [
+    "NYY"
+   ],
+   "name": "Savannah Bananas 2x (Yankee Stadium)",
+   "start_date": "2026-04-25",
+   "end_date": "2026-04-26",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/yankees/ballpark/upcoming-events (JAY-Z 30/25/Extra Innings) + Bananas-Tourplan/ESPN (abgerufen 2026-06-11)",
+   "note": "thirdparty:NYY:2026"
+  },
+  {
+   "city": "Bronx",
+   "team_ids": [
+    "NYY"
+   ],
+   "name": "Konzert JAY-Z 3 Naechte (Yankee Stadium)",
+   "start_date": "2026-07-10",
+   "end_date": "2026-07-12",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/yankees/ballpark/upcoming-events (JAY-Z 30/25/Extra Innings) + Bananas-Tourplan/ESPN (abgerufen 2026-06-11)",
+   "note": "thirdparty:NYY:2026"
+  },
+  {
+   "city": "Los Angeles",
+   "team_ids": [
+    "LAD"
+   ],
+   "name": "Konzert Fuerza Regida (Dodger Stadium)",
+   "start_date": "2026-07-18",
+   "end_date": "2026-07-18",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Fuerza-Regida-Stadiontour 'This Is Our Dream' (ticketnews.com 2026-02; Venue-Kalender; abgerufen 2026-06-11)",
+   "note": "thirdparty:LAD:2026"
+  },
+  {
+   "city": "San Diego",
+   "team_ids": [
+    "SDP"
+   ],
+   "name": "Konzert Fuerza Regida (Petco, Tour-Auftakt)",
+   "start_date": "2026-06-18",
+   "end_date": "2026-06-18",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Fuerza-Regida-Stadiontour 'This Is Our Dream' (ticketnews.com 2026-02; Venue-Kalender; abgerufen 2026-06-11)",
+   "note": "thirdparty:SDP:2026"
+  },
+  {
+   "city": "Seattle",
+   "team_ids": [
+    "SEA"
+   ],
+   "name": "Konzert Fuerza Regida (T-Mobile Park)",
+   "start_date": "2026-06-25",
+   "end_date": "2026-06-25",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Fuerza-Regida-Stadiontour 'This Is Our Dream' (ticketnews.com 2026-02; Venue-Kalender; abgerufen 2026-06-11)",
+   "note": "thirdparty:SEA:2026"
+  },
+  {
+   "city": "Seattle",
+   "team_ids": [
+    "SEA"
+   ],
+   "name": "Konzert Noah Kahan 2x (T-Mobile Park)",
+   "start_date": "2026-08-30",
+   "end_date": "2026-08-31",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "mlb.com/mariners/tickets/concerts + livenation (abgerufen 2026-06-11)",
+   "note": "thirdparty:SEA:2026"
+  },
+  {
+   "city": "San Diego",
+   "team_ids": [
+    "SDP"
+   ],
+   "name": "Savannah Bananas 2x (Petco)",
+   "start_date": "2026-03-21",
+   "end_date": "2026-03-22",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11)",
+   "note": "thirdparty:SDP:2026"
+  },
+  {
+   "city": "Kansas City",
+   "team_ids": [
+    "KCR"
+   ],
+   "name": "Savannah Bananas 2x (Kauffman)",
+   "start_date": "2026-05-30",
+   "end_date": "2026-05-31",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11)",
+   "note": "thirdparty:KCR:2026"
+  },
+  {
+   "city": "Cincinnati",
+   "team_ids": [
+    "CIN"
+   ],
+   "name": "Savannah Bananas 3x (GABP)",
+   "start_date": "2026-06-19",
+   "end_date": "2026-06-21",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11)",
+   "note": "thirdparty:CIN:2026"
+  },
+  {
+   "city": "Minneapolis",
+   "team_ids": [
+    "MIN"
+   ],
+   "name": "Savannah Bananas 3x (Target Field)",
+   "start_date": "2026-08-07",
+   "end_date": "2026-08-09",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11)",
+   "note": "thirdparty:MIN:2026"
+  },
+  {
+   "city": "Denver",
+   "team_ids": [
+    "COL"
+   ],
+   "name": "Savannah Bananas 2x (Coors Field)",
+   "start_date": "2026-08-14",
+   "end_date": "2026-08-15",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11)",
+   "note": "thirdparty:COL:2026"
+  },
+  {
+   "city": "St. Louis",
+   "team_ids": [
+    "STL"
+   ],
+   "name": "Savannah Bananas 2x (Busch)",
+   "start_date": "2026-08-21",
+   "end_date": "2026-08-22",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11)",
+   "note": "thirdparty:STL:2026"
+  },
+  {
+   "city": "Arlington",
+   "team_ids": [
+    "TEX"
+   ],
+   "name": "Savannah Bananas 3x (Globe Life Field)",
+   "start_date": "2026-09-25",
+   "end_date": "2026-09-27",
+   "severity": 5,
+   "category": "stadium_booking",
+   "source": "Savannah-Bananas-2026-World-Tour (thesavannahbananas.com/ESPN/Venue-Seiten, abgerufen 2026-06-11); globelifefield.com/event + arlingtontx.gov",
+   "note": "thirdparty:TEX:2026"
+  }
+ ],
+ "_known_gaps": [
+  "Tampa Bay (TBR) — keine prominenten 2026-MLB-Konflikt-Events identifiziert",
+  "St. Louis (STL) — keine identifiziert",
+  "Kansas City (KCR) — keine identifiziert",
+  "Denver (COL) — Cherry Creek Arts Festival und Great American Beer Festival möglich, nicht bestätigt",
+  "West Sacramento (OAK) — Interim-Lokation, kaum recherchierbar",
+  "Toronto (TOR) — Caribana, TIFF erwähnt, nicht datierbar bestätigt",
+  "Anaheim (LAA) — OC Fair-Termine 2026 nicht bestätigt",
+  "Houston (HOU) — Marathon Januar (außerhalb MLB), keine weiteren MLB-Saison-Events",
+  "College-Football-Heimspiele — nur Cotton Bowl (TX State Fair) bestätigt, vollständige Schedule würde weitere Recherche erfordern"
+ ],
+ "_category_severity_defaults": {
+  "race": 3,
+  "festival": 4,
+  "sport": 3,
+  "fair": 4,
+  "convention": 4,
+  "showcase": 2,
+  "tourism": 3,
+  "concert": 2
+ },
+ "_note_c3": "C3-Befund 2026-06-11: Tampa Tarpons spielen 2025 NICHT in Steinbrenner Field, sondern auf 'Yankee Complex Field 2' (statsapi sportId=14, teamId=587, venueId=7250) — die Rays hatten Steinbrenner exklusiv; KEINE Tarpons-Blackouts noetig. River Cats teilen Sutter Health Park real mit den A's (2025-2027) -> 27 stadium_booking-Homestands oben.",
+ "_note_thirdparty_2026": "Drittnutzungs-Recherche 2026-06-11 (Konzerte/Events, Voll-Stadion, datiert+belegt). WATCHLIST (angekuendigt, Datum/Venue-Typ unbestaetigt — NICHT als Blackout gefuehrt): Petco: Ed Sheeran, My Chemical Romance, Noah Kahan, Cypress Hill, Madison Beer (tw. Gallagher Square = Nicht-Feld!), Doechii, Deftones; Oracle Park: 2 unbenannte Shows; Truist: keine 2026-Ankuendigung gefunden. Pflege: manuell + Kollisions-Validierung (tools/fetch_cotenant_calendars --validate-only deckt cotenant; Drittnutzung via tests/test_external_data + venue_conflicts gegen Retrosheet-Original)."
+}

@@ -1,0 +1,28 @@
+{
+  "_source": "ILLUSTRATIVE Seed-Daten zum Testen der Hotel-Engine. Koordinaten approximativ (Stadtteil-Ebene). In Produktion ersetzt der Club diese durch seine REALEN Buchungs-/Historie-Daten (preferred properties, Raten, Sicherheits-Audits). past_stays/past_rating sind hier Beispielwerte.",
+  "_schema": "team_id -> [ {name, lat, lon, tier(1-5 Komfort), security_tier(1-5), nightly_rate_usd, past_stays, past_rating(1-5), notes} ]",
+  "_illustrative": true,
+  "hotels": {
+    "NYY": [
+      {"name": "Midtown Manhattan Flagship", "lat": 40.7566, "lon": -73.9863, "tier": 5, "security_tier": 5, "nightly_rate_usd": 540, "past_stays": 14, "past_rating": 4.6, "notes": "Bewährtes Team-Hotel-Niveau; eigener Sicherheitsdienst, Sky-Bridge-Anlieferung."},
+      {"name": "Bronx Ballpark-District Hotel", "lat": 40.8270, "lon": -73.9230, "tier": 3, "security_tier": 3, "nightly_rate_usd": 260, "past_stays": 2, "past_rating": 3.9, "notes": "Sehr nah am Yankee Stadium (kurze Transfers), niedrigeres Komfort-Tier."},
+      {"name": "Midtown East Business Hotel", "lat": 40.7540, "lon": -73.9710, "tier": 4, "security_tier": 4, "nightly_rate_usd": 410, "past_stays": 7, "past_rating": 4.3, "notes": "Solide Alternative, gute Anbindung."}
+    ],
+    "BOS": [
+      {"name": "Back Bay Luxury Hotel", "lat": 42.3479, "lon": -71.0810, "tier": 5, "security_tier": 5, "nightly_rate_usd": 480, "past_stays": 11, "past_rating": 4.7, "notes": "Nahe Fenway, Premium-Security, häufig genutzt."},
+      {"name": "Fenway-District Hotel", "lat": 42.3450, "lon": -71.0990, "tier": 4, "security_tier": 4, "nightly_rate_usd": 350, "past_stays": 5, "past_rating": 4.2, "notes": "Gehdistanz zum Ballpark."}
+    ],
+    "TBR": [
+      {"name": "Downtown St. Petersburg Hotel", "lat": 27.7700, "lon": -82.6360, "tier": 4, "security_tier": 4, "nightly_rate_usd": 300, "past_stays": 6, "past_rating": 4.1, "notes": "Nahe Tropicana Field."},
+      {"name": "Waterfront Resort", "lat": 27.7710, "lon": -82.6280, "tier": 5, "security_tier": 4, "nightly_rate_usd": 420, "past_stays": 3, "past_rating": 4.4, "notes": "Höheres Tier, etwas weiter."}
+    ],
+    "TOR": [
+      {"name": "Downtown Toronto Tower Hotel", "lat": 43.6440, "lon": -79.3870, "tier": 5, "security_tier": 5, "nightly_rate_usd": 410, "past_stays": 9, "past_rating": 4.5, "notes": "Direkt am Rogers Centre, Skywalk-Anbindung."},
+      {"name": "Financial District Hotel", "lat": 43.6480, "lon": -79.3810, "tier": 4, "security_tier": 4, "nightly_rate_usd": 330, "past_stays": 4, "past_rating": 4.0, "notes": "Kurzer Transfer."}
+    ],
+    "BAL": [
+      {"name": "Inner Harbor Hotel", "lat": 39.2860, "lon": -76.6100, "tier": 4, "security_tier": 4, "nightly_rate_usd": 290, "past_stays": 8, "past_rating": 4.3, "notes": "Gehdistanz zu Camden Yards."},
+      {"name": "Harbor East Premium", "lat": 39.2830, "lon": -76.6000, "tier": 5, "security_tier": 5, "nightly_rate_usd": 400, "past_stays": 5, "past_rating": 4.6, "notes": "Premium-Security."}
+    ]
+  }
+}

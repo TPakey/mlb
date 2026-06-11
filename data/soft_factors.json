@@ -1,0 +1,52 @@
+{
+  "description": "Kuratierte Soft-Factors fuer den MLB-Saisonoptimierer. Werden im Optimizer als Strafterme verwendet.",
+  "events": [
+    {"city": "New York", "team_ids": ["NYM", "NYY"], "name": "US Open Tennis", "start": "2026-08-24", "end": "2026-09-13", "severity": 3, "reason": "Flushing Meadows ueberlastet (NYM-Stadion direkt daneben); Bronx weniger betroffen"},
+    {"city": "Washington", "team_ids": ["WSN"], "name": "National Cherry Blossom Festival", "start": "2026-03-20", "end": "2026-04-12", "severity": 2, "reason": "Tourismusspitze, Verkehrsbelastung Innenstadt"},
+    {"city": "Boston", "team_ids": ["BOS"], "name": "Boston Marathon", "start": "2026-04-20", "end": "2026-04-20", "severity": 4, "reason": "Patriots-Day-Tradition: morgendliches Heimspiel verschiebt sich; einzigartiges Event"},
+    {"city": "Milwaukee", "team_ids": ["MIL"], "name": "Summerfest", "start": "2026-06-25", "end": "2026-07-04", "severity": 3, "reason": "Groesstes Musikfestival der Welt nebenan; Hotel- und Verkehrslogistik"},
+    {"city": "San Diego", "team_ids": ["SDP"], "name": "Comic-Con International", "start": "2026-07-23", "end": "2026-07-26", "severity": 4, "reason": "Petco Park ist im Konferenzcenter-Umkreis; 130k Besucher in Downtown"},
+    {"city": "Miami", "team_ids": ["MIA"], "name": "Hurricane-Risikofenster", "start": "2026-08-15", "end": "2026-10-15", "severity": 3, "reason": "Heimspielserien in dieser Phase besser vermeiden, falls Alternativen vorhanden"},
+    {"city": "Houston", "team_ids": ["HOU"], "name": "Hurricane-Risikofenster", "start": "2026-08-15", "end": "2026-10-15", "severity": 2, "reason": "Retractable Roof mildert Wetterprobleme; trotzdem Logistikrisiko"},
+    {"city": "Tampa Bay", "team_ids": ["TBR"], "name": "Hurricane-Risikofenster", "start": "2026-08-15", "end": "2026-10-15", "severity": 3, "reason": "Tropicana-Dach 2024 beschaedigt, Reparaturlage unsicher"},
+    {"city": "Minneapolis", "team_ids": ["MIN"], "name": "Minnesota State Fair", "start": "2026-08-27", "end": "2026-09-07", "severity": 2, "reason": "Verkehr und Hotels stark ausgelastet"},
+    {"city": "Atlanta", "team_ids": ["ATL"], "name": "Music Midtown Festival", "start": "2026-09-19", "end": "2026-09-20", "severity": 2, "reason": "Innenstadt-Verkehr"},
+    {"city": "Chicago", "team_ids": ["CHC", "CWS"], "name": "Lollapalooza", "start": "2026-07-30", "end": "2026-08-02", "severity": 3, "reason": "Hotels in Downtown ausverkauft; Wrigleyville und South Side moderater betroffen"},
+    {"city": "Phoenix", "team_ids": ["ARI"], "name": "Sommerhitze-Spitze", "start": "2026-07-01", "end": "2026-08-15", "severity": 1, "reason": "Tagespiele unspielbar; Abendspiele OK"},
+    {"city": "Denver", "team_ids": ["COL"], "name": "Kaeltefenster April", "start": "2026-04-01", "end": "2026-04-20", "severity": 2, "reason": "Schneerisiko bis Mitte April"},
+    {"city": "Cleveland", "team_ids": ["CLE"], "name": "Kaeltefenster April", "start": "2026-04-01", "end": "2026-04-15", "severity": 2, "reason": "Lake-Effect-Schnee, kalter Wind"},
+    {"city": "Detroit", "team_ids": ["DET"], "name": "Kaeltefenster April", "start": "2026-04-01", "end": "2026-04-15", "severity": 2, "reason": ""},
+    {"city": "Minneapolis", "team_ids": ["MIN"], "name": "Kaeltefenster April", "start": "2026-04-01", "end": "2026-04-20", "severity": 3, "reason": "Haerteste Kaelte aller offenen Stadien"},
+    {"city": "Toronto", "team_ids": ["TOR"], "name": "Kaeltefenster April", "start": "2026-04-01", "end": "2026-04-15", "severity": 1, "reason": "Dach mildert das"},
+    {"city": "Boston", "team_ids": ["BOS"], "name": "Kaeltefenster April", "start": "2026-04-01", "end": "2026-04-15", "severity": 2, "reason": ""},
+    {"city": "Cincinnati", "team_ids": ["CIN"], "name": "Opening-Day-Parade", "start": "2026-03-26", "end": "2026-03-26", "severity": 4, "reason": "Heimoeffnung Tradition seit 1876; sollte Heimspiel sein"}
+  ],
+  "nfl_conflicts": [
+    {"team_id": "OAK", "note": "Sutter Health Park ist Minor-League-Stadion ohne NFL-Konflikt"}
+  ],
+  "weather_profiles": {
+    "cold_april_cities": ["BOS", "NYY", "CWS", "CLE", "DET", "MIN", "COL", "CHC", "PIT", "TOR"],
+    "hot_july_cities_open_roof": ["ATL", "STL", "KCR", "CIN", "WSN", "PHI", "BAL"],
+    "domed_or_retractable": ["TBR", "TOR", "HOU", "SEA", "TEX", "MIA", "MIL", "ARI"]
+  },
+  "tv_primetime_matchups": [
+    {"teams": ["NYY", "BOS"], "weight": 5, "reason": "Klassikerrivalitaet, hoechste Einschaltquoten"},
+    {"teams": ["LAD", "SFG"], "weight": 5, "reason": "Westkuesten-Rivalitaet"},
+    {"teams": ["NYM", "NYY"], "weight": 4, "reason": "Subway Series"},
+    {"teams": ["LAD", "LAA"], "weight": 4, "reason": "Freeway Series"},
+    {"teams": ["CHC", "CWS"], "weight": 4, "reason": "Crosstown Classic"},
+    {"teams": ["CHC", "STL"], "weight": 4, "reason": "Historische NL-Central-Rivalitaet"},
+    {"teams": ["OAK", "SFG"], "weight": 3, "reason": "Bay Bridge Series"},
+    {"teams": ["BAL", "WSN"], "weight": 3, "reason": "Beltway Series"},
+    {"teams": ["NYY", "LAD"], "weight": 5, "reason": "Marktgroesse beider Maerkte"},
+    {"teams": ["BOS", "PHI"], "weight": 3, "reason": "Ostkueste-Powerhouses"}
+  ],
+  "schedule_milestones_2026": {
+    "season_start": "2026-03-26",
+    "season_end": "2026-09-27",
+    "all_star_break_start": "2026-07-13",
+    "all_star_break_end": "2026-07-16",
+    "all_star_game": "2026-07-14",
+    "all_star_host_city": "Philadelphia"
+  }
+}

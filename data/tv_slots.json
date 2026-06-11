@@ -1,0 +1,244 @@
+{
+  "_source": "docs/TV_SLOT_RESEARCH.md",
+  "_season": 2026,
+  "_unit": "score (dimensionless multiplier)",
+  "_note": "Slot-Konfiguration und Marquee-Matchup-Bonus für TV-Slot-Score. Wird konsumiert von src/tv_slots.py (Sprint 2.3, Phase 2).",
+
+  "broadcasters": {
+    "apple_tv_plus": {
+      "name": "Apple TV+ Friday Night Baseball",
+      "weekday": 4,
+      "daypart": "night",
+      "games_per_week": 2,
+      "weeks_active": 25,
+      "approx_total_slots": 50,
+      "season_start": "2026-03-27",
+      "broadcast_type": "streaming"
+    },
+    "fox_saturday_primetime": {
+      "name": "FOX Saturday Baseball Night in America",
+      "weekday": 5,
+      "daypart": "night",
+      "windows": [
+        {"start": "2026-03-28", "end": "2026-06-20"},
+        {"start": "2026-07-18", "end": "2026-09-05"}
+      ],
+      "approx_total_slots": 24,
+      "broadcast_type": "broadcast_tv"
+    },
+    "fox_saturday_afternoon": {
+      "name": "FOX Saturday Afternoon",
+      "weekday": 5,
+      "daypart": "day",
+      "approx_total_slots": 12,
+      "broadcast_type": "broadcast_tv",
+      "note": "regionalisiert; oft Doppelheader mit dem Primetime-Slot"
+    },
+    "nbc_sunday_night": {
+      "name": "NBC/Peacock Sunday Night Baseball",
+      "weekday": 6,
+      "daypart": "night",
+      "primary_window": {"start": "2026-05-31", "end": "2026-09-06"},
+      "special_dates": ["2026-04-12", "2026-08-30"],
+      "approx_total_slots": 27,
+      "broadcast_type": "broadcast_streaming",
+      "premium": true
+    },
+    "nbc_sunday_leadoff": {
+      "name": "Peacock Sunday Leadoff",
+      "weekday": 6,
+      "daypart": "day",
+      "approx_total_slots": 18,
+      "broadcast_type": "streaming"
+    },
+    "tbs_tuesday_night": {
+      "name": "MLB on TBS Tuesday Night",
+      "weekday": 1,
+      "daypart": "night",
+      "season_start": "2026-03-31",
+      "approx_total_slots": 24,
+      "broadcast_type": "cable"
+    },
+    "mlb_network_showcase": {
+      "name": "MLB Network Showcase (Thursday)",
+      "weekday": 3,
+      "daypart": "night",
+      "season_start": "2026-04-02",
+      "approx_total_slots": 20,
+      "broadcast_type": "cable"
+    },
+    "espn_midweek": {
+      "name": "ESPN Reduziertes Bundle (Midweek)",
+      "weekday_pattern": [0, 2, 3],
+      "daypart": "night",
+      "approx_total_slots": 30,
+      "concentration_window": {"start": "2026-06-01", "end": "2026-08-31"},
+      "broadcast_type": "cable",
+      "note": "23 von 30 Spielen in Juni-August"
+    },
+    "netflix_special": {
+      "name": "Netflix Special Events",
+      "approx_total_slots": 3,
+      "broadcast_type": "streaming",
+      "fixed_events": [
+        {"name": "Opening Night", "date": "2026-03-25", "matchup": "NYY at SFG"},
+        {"name": "Home Run Derby", "date": "2026-07-13"},
+        {"name": "Field of Dreams Game", "date": "2026-08-13"}
+      ]
+    }
+  },
+
+  "slot_value_by_weekday_daypart": {
+    "_format": "weekday (0=Mo .. 6=So) -> daypart -> Slot-Wert",
+    "0": {"day": 0.85, "night": 0.90},
+    "1": {"day": 0.85, "night": 1.20, "_note_night": "TBS Tuesday Night"},
+    "2": {"day": 0.85, "night": 1.10, "_note_night": "ESPN Midweek"},
+    "3": {"day": 0.85, "night": 1.05, "_note_night": "MLB Network Showcase"},
+    "4": {"day": 0.90, "night": 1.20, "_note_night": "Apple TV+ Friday Night"},
+    "5": {"day": 1.10, "night": 1.50, "_note_day": "FOX Saturday Afternoon", "_note_night": "FOX Baseball Night in America"},
+    "6": {"day": 1.05, "night": 1.60, "_note_day": "Sunday Leadoff", "_note_night": "NBC Sunday Night Baseball (Premium)"}
+  },
+
+  "daypart_mix_by_weekday": {
+    "_format": "weekday (0=Mo .. 6=So) -> {day, night} Wahrscheinlichkeit. Sprint 2.9 / Review C2.",
+    "_note": "Erwartungswert-Modell statt monolithischer Heuristik. P(daypart|weekday) spiegelt das realistische MLB-Day/Night-Verhaeltnis: werktags abend-dominiert, Samstag stark gemischt (FOX Afternoon + Primetime), Sonntag tag-dominiert mit einem NBC-Sunday-Night-Slot. Vorlaeufig (Plan-Phase ohne fixe Stats-API-Spielzeiten); ersetzbar durch echte Spielzeiten oder eine daypart-Entscheidungsvariable im SA (Plan 2.9.1).",
+    "0": {"day": 0.25, "night": 0.75},
+    "1": {"day": 0.15, "night": 0.85},
+    "2": {"day": 0.15, "night": 0.85},
+    "3": {"day": 0.15, "night": 0.85},
+    "4": {"day": 0.12, "night": 0.88},
+    "5": {"day": 0.55, "night": 0.45},
+    "6": {"day": 0.88, "night": 0.12}
+  },
+
+  "marquee_matchups": [
+    {
+      "teams": ["NYY", "BOS"],
+      "label": "Yankees–Red Sox",
+      "bonus_multiplier": 1.50,
+      "category": "classic_rivalry"
+    },
+    {
+      "teams": ["LAD", "NYY"],
+      "label": "Dodgers–Yankees (WS-Rematch 2024)",
+      "bonus_multiplier": 1.50,
+      "category": "marquee_interleague"
+    },
+    {
+      "teams": ["LAD", "SFG"],
+      "label": "Dodgers–Giants",
+      "bonus_multiplier": 1.40,
+      "category": "classic_rivalry"
+    },
+    {
+      "teams": ["LAD", "PHI"],
+      "label": "Dodgers–Phillies (NLDS-Rematch 2025)",
+      "bonus_multiplier": 1.40,
+      "category": "recent_postseason"
+    },
+    {
+      "teams": ["LAD", "SDP"],
+      "label": "Dodgers–Padres",
+      "bonus_multiplier": 1.35,
+      "category": "nl_west_rivalry"
+    },
+    {
+      "teams": ["LAD", "TOR"],
+      "label": "Dodgers–Blue Jays (WS-Rematch 2025)",
+      "bonus_multiplier": 1.40,
+      "category": "recent_postseason"
+    },
+    {
+      "teams": ["CHC", "STL"],
+      "label": "Cubs–Cardinals",
+      "bonus_multiplier": 1.35,
+      "category": "classic_rivalry"
+    },
+    {
+      "teams": ["NYY", "NYM"],
+      "label": "Subway Series",
+      "bonus_multiplier": 1.40,
+      "category": "geographic_rivalry"
+    },
+    {
+      "teams": ["CHC", "CWS"],
+      "label": "Crosstown Classic",
+      "bonus_multiplier": 1.30,
+      "category": "geographic_rivalry"
+    },
+    {
+      "teams": ["LAD", "LAA"],
+      "label": "Freeway Series",
+      "bonus_multiplier": 1.25,
+      "category": "geographic_rivalry"
+    },
+    {
+      "teams": ["NYM", "PHI"],
+      "label": "Mets–Phillies",
+      "bonus_multiplier": 1.20,
+      "category": "nl_east_rivalry"
+    },
+    {
+      "teams": ["NYY", "TOR"],
+      "label": "Yankees–Blue Jays",
+      "bonus_multiplier": 1.20,
+      "category": "al_east_rivalry"
+    }
+  ],
+
+  "historic_pick_prob": {
+    "_note": "Faktor 0.6 (kleinster Markt) bis 1.4 (LAD, NYY) — historische Wahrscheinlichkeit, dass das Heimteam in einem nationalen Slot eingeplant wird. Wird mit dem slot_value multipliziert.",
+    "LAD": 1.40,
+    "NYY": 1.40,
+    "BOS": 1.30,
+    "CHC": 1.30,
+    "NYM": 1.20,
+    "PHI": 1.20,
+    "SFG": 1.20,
+    "ATL": 1.15,
+    "HOU": 1.15,
+    "STL": 1.15,
+    "SDP": 1.10,
+    "TOR": 1.10,
+    "SEA": 1.05,
+    "TEX": 1.05,
+    "MIN": 1.00,
+    "LAA": 1.00,
+    "BAL": 0.95,
+    "DET": 0.95,
+    "ARI": 0.90,
+    "MIL": 0.90,
+    "CIN": 0.85,
+    "WSN": 0.85,
+    "TBR": 0.80,
+    "CLE": 0.80,
+    "PIT": 0.75,
+    "KCR": 0.75,
+    "CWS": 0.75,
+    "COL": 0.75,
+    "MIA": 0.70,
+    "OAK": 0.65
+  },
+
+  "expected_national_slots_per_season": {
+    "_note": "Bisher bestätigt durch Recherche, addiert: ~200 nationale Slots (8% aller Spiele).",
+    "apple_tv_plus": 50,
+    "fox_saturday_primetime": 24,
+    "fox_saturday_afternoon": 12,
+    "nbc_sunday_night": 27,
+    "nbc_sunday_leadoff": 18,
+    "tbs_tuesday_night": 24,
+    "mlb_network_showcase": 20,
+    "espn_midweek": 30,
+    "netflix_special": 3,
+    "total": 208
+  },
+
+  "_validation_targets": {
+    "_note": "Sanity-Checks für src/tv_slots.py-Modell.",
+    "marquee_match_coverage_min": 0.10,
+    "marquee_match_coverage_max": 0.25,
+    "premium_slot_fill_min": 0.85,
+    "_premium_slot_fill_note": "85% der NBC/FOX/Apple-Primetime-Slots sollten in den oberen 50% der Marquee-Liste fallen"
+  }
+}

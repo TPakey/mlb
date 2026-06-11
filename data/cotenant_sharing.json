@@ -1,0 +1,34 @@
+{
+ "_source": "Venue-Sharing-Registry (C3). Belegt per statsapi-venueId-IDENTITÄT (nicht vermutet): /api/v1/teams/<id>?season=<jahr> liefert das Heimstadion; teilen sich MLB-Club und MiLB-Team dieselbe venueId, sind die MiLB-Heimspieltage harte Stadion-Belegungen für den MLB-Club. Abgerufen/verifiziert 2026-06-11. Refresh: python -m tools.fetch_cotenant_calendars (Teil von tools/update_external_data --all).",
+ "_rating": "A (offizielle MLB/MiLB Stats API, venueId-Beleg je Eintrag)",
+ "sharing": [
+  {
+   "mlb_team": "OAK",
+   "mlb_statsapi_id": 133,
+   "venue_id": 2529,
+   "venue": "Sutter Health Park",
+   "cotenant_name": "Sacramento River Cats",
+   "cotenant_sport_id": 11,
+   "cotenant_team_id": 105,
+   "seasons": [2025, 2026, 2027],
+   "verified": "2026-06-11: teams/133?season=2026 -> venueId 2529 == venueId der River Cats (teams?sportId=11). Interimsheim bis Las-Vegas-Umzug (teams.json-Notiz).",
+   "severity": 5
+  }
+ ],
+ "resolved_non_sharing": [
+  {
+   "mlb_team": "TBR",
+   "season": 2025,
+   "venue": "George M. Steinbrenner Field",
+   "candidate_cotenant": "Tampa Tarpons (sportId 14, teamId 587)",
+   "finding": "Tarpons spielten 2025 auf 'Yankee Complex Field 2' (venueId 7250, statsapi sportId=14 season=2025) — Rays hatten Steinbrenner exklusiv. KEINE Blackouts nötig.",
+   "verified": "2026-06-11"
+  },
+  {
+   "mlb_team": "TBR",
+   "season": 2026,
+   "finding": "Rays zurück in Tropicana Field (teams/139?season=2026 -> venueId 12). Kein Co-Tenant.",
+   "verified": "2026-06-11"
+  }
+ ]
+}

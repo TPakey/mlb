@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MLB Schedule Tuner — Prioritäten & Phasen-Regler</title>
+<style>
+  :root{ --navy:#0c2340; --red:#bf0d3e; --ok:#157f3b; --bad:#b3261e; --line:#e6e8ec; --bg:#f6f7f9; }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:var(--bg);color:#15181c}
+  header{background:var(--navy);color:#fff;padding:20px 28px}
+  header h1{margin:0 0 3px;font-size:21px}
+  header p{margin:0;opacity:.85;font-size:13px}
+  main{max-width:1080px;margin:0 auto;padding:22px 28px 70px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  h2{font-size:15px;color:var(--navy);margin:0 0 4px}
+  .sub{font-size:12px;color:#5f6368;margin:0 0 14px}
+  .dim{margin:13px 0}
+  .dim .row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+  .dim .name{font-weight:600}
+  .dim .est{font-variant-numeric:tabular-nums;font-size:12px;color:#3a3f45}
+  input[type=range]{width:100%;accent-color:var(--red);margin:5px 0 1px}
+  .hint{font-size:11px;color:#80868b}
+  .note{background:#fff8e1;border-left:4px solid #f5b400;padding:10px 13px;border-radius:6px;font-size:12.5px;margin:0 0 18px}
+  .phase{border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin:11px 0;background:#fbfcfd}
+  .phase .ph-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .phase input[type=text]{flex:1;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:13px}
+  .phase input[type=date]{border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:12px}
+  .mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px}
+  .mini .m label{font-size:12px;font-weight:600}
+  .mini .m .est{font-size:11px;color:#3a3f45}
+  button{font:inherit;border:0;border-radius:7px;padding:8px 14px;cursor:pointer}
+  .btn-add{background:#eef1f5;color:var(--navy);font-size:13px}
+  .btn-del{background:#fde8e8;color:var(--bad);font-size:12px;padding:4px 9px}
+  .btn-export{background:var(--navy);color:#fff;font-weight:600}
+  pre{background:#0c2340;color:#cfe;border-radius:8px;padding:12px;font-size:11.5px;overflow:auto;max-height:260px;white-space:pre-wrap}
+  .kpi{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
+  .kpi div{font-size:12.5px}
+  .kpi b{font-variant-numeric:tabular-nums}
+  .badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#eef1f5;color:#3a3f45;margin-left:6px}
+</style></head>
+<body>
+<header>
+  <h1>MLB Schedule Tuner</h1>
+  <p>Prioritäten global setzen, pro Saison-Phase feinjustieren — mit geschätzter Wirkung in echten Einheiten. Kalibriert auf Saison 2024 (Warm-Start).</p>
+</header>
+<main>
+  <div class="note"><b>Wie zu lesen (kalibriert auf Saison 2024, gemessen).</b> Der große Hebel ist
+  der <b>Warm-Start</b>: er hebt Fenster-TV ≈ <b>+54 %</b> und Fenster-Revenue ≈ <b>+51 %</b> über
+  den realen MLB-Plan — bei <b>−5 % Reise</b> und voller CBA-Konformität. Die <b>Regler</b> justieren
+  darüber hinaus nur am Rand: der Plan ist durch 162 Spiele + CBA so eng beschränkt, dass die
+  Trade-off-Frontier schmal ist (Phasen-Multiplikator gemessen ~+1 % TV, ~0 % Revenue zusätzlich;
+  globale Gewichte ~1–2 %). Für die exakten Werte einer Einstellung: <b>„Diesen Plan rechnen"</b>.</div>
+
+  <div class="grid">
+    <!-- GLOBAL -->
+    <div class="card">
+      <h2>Globale Prioritäten <span class="badge">alle 8 Dimensionen</span></h2>
+      <p class="sub">Gewicht = wie stark eine Dimension in der Optimierung zählt. Wechselkurs zeigt den „Preis" in Reise-km.</p>
+      <div id="globals"></div>
+      <div class="kpi" id="estBundle"></div>
+    </div>
+
+    <!-- PHASES -->
+    <div class="card">
+      <h2>Saison-Phasen <span class="badge">pro Zeitfenster</span></h2>
+      <p class="sub">Zeitfenster mit eigenen Prioritäten. Bsp.: Saisonstart/-ende → TV+Revenue hoch; Sommer → Friction hoch.</p>
+      <div id="phases"></div>
+      <button class="btn-add" onclick="addPhase()">+ Phase hinzufügen</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <h2>Diesen Plan rechnen <span class="badge">echte Zahlen</span></h2>
+    <p class="sub">Schließt die Schleife: Konfiguration an den Optimizer schicken, vom realen Plan
+      warm-starten und die <b>tatsächlichen</b> Werte zurückbekommen (global vs. realer MLB-Plan + pro Fenster).
+      Läuft ~15–40 s. Benötigt die laufende API: <code>uvicorn tools.api:app</code></p>
+    <div class="kpi" style="margin-bottom:10px">
+      <div>API: <input type="text" id="apiUrl" value="http://127.0.0.1:8000/tune/evaluate" style="width:280px;border:1px solid var(--line);border-radius:6px;padding:4px 7px"></div>
+      <div>Saison: <input type="number" id="apiSeason" value="2024" style="width:80px;border:1px solid var(--line);border-radius:6px;padding:4px 7px"></div>
+      <div>Iterationen: <input type="number" id="apiIter" value="80000" step="10000" style="width:100px;border:1px solid var(--line);border-radius:6px;padding:4px 7px"></div>
+    </div>
+    <button class="btn-export" onclick="computePlan()">▶ Diesen Plan rechnen</button>
+    <span id="computeStatus" style="margin-left:12px;font-size:13px;color:#5f6368"></span>
+    <div id="computeResult" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <h2>Export — Konfiguration (JSON)</h2>
+    <p class="sub">Auch direkt per CLI nutzbar: <code>python -m tools.tune_run --config config.json --season 2024</code></p>
+    <button class="btn-export" onclick="doExport()">JSON aktualisieren</button>
+    <pre id="exportOut">{ }</pre>
+  </div>
+</main>
+
+<script>
+// ---- Kalibrierte Anker (gemessen, Saison 2024, Warm-Start) ----
+// Erreichbare Wertebereiche je Dimension (real .. optimiert/extrem).
+const CAL = {
+  travel_km:       { unit:"km",     ref:1644000, best:1617000, worst:1709835, exch:"1 km = 1 km" },
+  revenue_usd:     { unit:"Mio $",  ref:3333,    best:3362,    worst:3300,    scale:1e6, exch:"1 km ≈ 2,0 Mio $" },
+  fatigue_score:   { unit:"Pkt",    ref:8600,    best:6543,    worst:10900,   exch:"1 km = 1/20 Fatigue-Pkt" },
+  max_away_streak: { unit:"Tage",   ref:13,      best:11,      worst:16,      exch:"1 Tag = 5000 km" },
+  off_day_var:     { unit:"",       ref:0.0003,  best:0.0002,  worst:0.0009,  exch:"sehr kleine Skala" },
+  tv_slot_score:   { unit:"Pkt",    ref:2748,    best:2771,    worst:2700,    exch:"1 TV-Pkt = 200 km" },
+  event_friction:  { unit:"Pkt",    ref:0,       best:0,       worst:200,     exch:"1 Friction = 500 km" },
+  violations:      { unit:"Anz.",   ref:0,       best:0,       worst:5,       exch:"∞ (harte Regel)" },
+};
+// Globale Regler: Dimension -> {label, min, max, default(=balanced), key}
+const GLOB = [
+  {key:"w_travel",      cal:"travel_km",       label:"Reise minimieren",         min:0.1, max:5,   def:1.0,   step:0.1},
+  {key:"w_revenue",     cal:"revenue_usd",     label:"Revenue maximieren",       min:0.1, max:15,  def:1.0,   step:0.1, mr:true},
+  {key:"w_tv",          cal:"tv_slot_score",   label:"TV-Attraktivität",         min:0.1, max:20,  def:1.0,   step:0.1, mr:true},
+  {key:"w_fatigue",     cal:"fatigue_score",   label:"Spieler-Erholung",         min:0.1, max:5,   def:1.0,   step:0.1},
+  {key:"w_away_streak", cal:"max_away_streak", label:"Auswärts-Streak begrenzen",min:0.1, max:5,   def:1.0,   step:0.1},
+  {key:"w_off_day",     cal:"off_day_var",     label:"Off-Day-Gleichheit",       min:0.1, max:5,   def:1.0,   step:0.1},
+  {key:"w_friction",    cal:"event_friction",  label:"Stadtfeste meiden",        min:0.1, max:5,   def:1.0,   step:0.1},
+];
+// Basis-Gewichte (balanced) in echten km-Einheiten — für den Export.
+const BASE_W = { w_travel:1.0, w_revenue:-5e-7, w_fatigue:20.0, w_away_streak:5000.0,
+                 w_off_day:20000000.0, w_tv:-200.0, w_friction:500.0, violations_penalty:1e9 };
+
+const fmt = (v,d=0)=>v.toLocaleString('de-DE',{maximumFractionDigits:d,minimumFractionDigits:d});
+const state = { glob:{}, phases:[] };
+GLOB.forEach(g=>state.glob[g.key]=g.def);
+
+// Schätzung: relativer Regler r (1=neutral). >1 zieht die Dimension Richtung "best",
+// und Reise (Gegenspieler) leicht Richtung "worst". Frontier bewusst schmal.
+function estDimValue(g){
+  const c = CAL[g.cal];
+  const r = state.glob[g.key];                  // 0.1..max
+  const t = Math.max(0,(r-1))/(g.max-1);        // 0..1 oberhalb neutral
+  const tn = Math.max(0,(1-r))/(1-g.min);       // 0..1 unterhalb neutral
+  const val = c.ref + t*(c.best-c.ref) + tn*(c.worst-c.ref);
+  return val;
+}
+function buildGlobals(){
+  const root=document.getElementById('globals'); root.innerHTML='';
+  GLOB.forEach(g=>{
+    const c=CAL[g.cal];
+    const div=document.createElement('div'); div.className='dim';
+    div.innerHTML=`<div class="row"><span class="name">${g.label}</span>
+      <span class="est" id="est_${g.key}"></span></div>
+      <input type="range" min="${g.min}" max="${g.max}" step="${g.step}" value="${state.glob[g.key]}" id="rng_${g.key}">
+      <div class="hint">Wechselkurs: ${c.exch} · Bereich: ${fmt(c.worst, c.scale?0:4)}–${fmt(c.best,c.scale?0:4)} ${c.unit}</div>`;
+    root.appendChild(div);
+    div.querySelector('input').addEventListener('input',e=>{state.glob[g.key]=parseFloat(e.target.value);refresh();});
+  });
+}
+function refresh(){
+  GLOB.forEach(g=>{
+    const c=CAL[g.cal], v=estDimValue(g);
+    const shown = c.scale? v : v;
+    document.getElementById('est_'+g.key).textContent =
+      `≈ ${fmt(shown, c.scale?0:(g.cal==='off_day_var'?4:0))} ${c.unit}  (Regler ${state.glob[g.key].toFixed(1)}×)`;
+  });
+  // Geschätztes Bundle (Schlüsselwerte)
+  const km=estDimValue(GLOB[0]), rev=estDimValue(GLOB[1]), tv=estDimValue(GLOB[2]), fat=estDimValue(GLOB[3]);
+  document.getElementById('estBundle').innerHTML =
+    `<div>Reise: <b>${fmt(km)} km</b></div><div>Revenue: <b>${fmt(rev)} Mio $</b></div>`+
+    `<div>TV: <b>${fmt(tv)}</b></div><div>Fatigue: <b>${fmt(fat)}</b></div>`+
+    `<div style="color:#5f6368">vs. realer Plan: 1.709.835 km · 3.362 Mio $ · TV 2.771</div>`;
+  doExport();
+}
+
+// ---- Phasen ----
+function addPhase(p){
+  p = p || {name:"Saisonstart", start:"2024-03-20", end:"2024-04-07", mult:{tv:3.0,revenue:2.0,friction:1.0}};
+  state.phases.push(p); buildPhases(); doExport();
+}
+const PH_DIMS=[{k:"tv",label:"TV",cal:"tv_slot_score"},{k:"revenue",label:"Revenue",cal:"revenue_usd"},{k:"friction",label:"Friction",cal:"event_friction"}];
+// Kalibrierte Fenster-Wirkung (gemessen, Saison 2024, 40k Iter, data/phase_calibration.json).
+// uplift = Fenster-Metrik / realer-Plan-Wert. Multiplikator-Kurve (monotone Interpolation).
+const CALIB={
+  tv:{real:1.5163, curve:[[1,1.5163],[2,1.554],[4,1.560],[8,1.5639]]},
+  revenue:{real:1.5133, curve:[[1,1.5133],[2,1.5133],[4,1.5133],[8,1.5133]]}
+};
+function calUplift(dim,m){ const c=CALIB[dim]; if(!c) return null; const p=c.curve;
+  if(m<=p[0][0]) return p[0][1]; if(m>=p[p.length-1][0]) return p[p.length-1][1];
+  for(let i=0;i<p.length-1;i++){ if(m>=p[i][0]&&m<=p[i+1][0]){
+    const t=(m-p[i][0])/(p[i+1][0]-p[i][0]); return p[i][1]+t*(p[i+1][1]-p[i][1]); } }
+  return p[0][1]; }
+function buildPhases(){
+  const root=document.getElementById('phases'); root.innerHTML='';
+  state.phases.forEach((p,i)=>{
+    const div=document.createElement('div'); div.className='phase';
+    let mini='';
+    PH_DIMS.forEach(d=>{
+      const m=(p.mult[d.k]??1.0);
+      const up=calUplift(d.k,m);
+      let est;
+      if(up!=null){
+        const pct=Math.round((up-1)*100);
+        const base=Math.round((CALIB[d.k].curve[0][1]-1)*100);
+        const extra=pct-base;
+        est=`≈ Fenster-${d.label} <b>+${pct}%</b> vs real <span style="color:#80868b">(Warm-Start +${base}%, Regler +${extra}%)</span>`;
+      } else { est=(m>1.05?'↑ priorisiert':'neutral')+' · echte Werte → „Rechnen"'; }
+      mini+=`<div class="m"><label>${d.label} ×<span id="ml_${i}_${d.k}">${m.toFixed(1)}</span></label>
+        <input type="range" min="1" max="10" step="0.5" value="${m}" oninput="setMult(${i},'${d.k}',this.value)">
+        <div class="est">${est}</div></div>`;
+    });
+    div.innerHTML=`<div class="ph-head">
+        <input type="text" value="${p.name}" oninput="state.phases[${i}].name=this.value;doExport()">
+        <input type="date" value="${p.start}" oninput="state.phases[${i}].start=this.value;doExport()">
+        <input type="date" value="${p.end}" oninput="state.phases[${i}].end=this.value;doExport()">
+        <button class="btn-del" onclick="delPhase(${i})">löschen</button></div>
+      <div class="mini">${mini}</div>`;
+    root.appendChild(div);
+  });
+}
+function setMult(i,k,v){ state.phases[i].mult[k]=parseFloat(v); document.getElementById(`ml_${i}_${k}`).textContent=parseFloat(v).toFixed(1); buildPhases(); doExport(); }
+function delPhase(i){ state.phases.splice(i,1); buildPhases(); doExport(); }
+
+// ---- Export ----
+function doExport(){
+  // Profil-Gewichte = Basis × Regler (Revenue/TV sind negativ → Betrag skalieren)
+  const w={};
+  for(const k in BASE_W){ w[k]=BASE_W[k]; }
+  GLOB.forEach(g=>{ w[g.key]=BASE_W[g.key]*state.glob[g.key]; });
+  const plan={phases:state.phases.filter(p=>p.start&&p.end).map(p=>{
+    const mult={}; for(const k in p.mult){ if(Math.abs(p.mult[k]-1)>1e-9) mult[k]=p.mult[k]; }
+    return {name:p.name,start:p.start,end:p.end,multipliers:mult};
+  })};
+  const out={profile_weights:w, phase_plan:plan};
+  document.getElementById('exportOut').textContent=JSON.stringify(out,null,2);
+}
+
+// ---- Echte Berechnung über die API ----
+async function computePlan(){
+  doExport();
+  const cfg=JSON.parse(document.getElementById('exportOut').textContent);
+  const body={profile_weights:cfg.profile_weights, phase_plan:cfg.phase_plan,
+    season:parseInt(document.getElementById('apiSeason').value),
+    pareto_iterations:parseInt(document.getElementById('apiIter').value)};
+  const st=document.getElementById('computeStatus'), out=document.getElementById('computeResult');
+  st.textContent='rechne … (~15–40 s)'; out.innerHTML='';
+  try{
+    const r=await fetch(document.getElementById('apiUrl').value,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){throw new Error('HTTP '+r.status+' '+(await r.text()));}
+    const d=await r.json(); st.textContent='fertig ✓'; renderResult(d,out);
+  }catch(e){
+    st.textContent='';
+    out.innerHTML=`<div class="note">Konnte die API nicht erreichen (${e.message}).<br>
+      Starte sie mit <code>uvicorn tools.api:app</code> — oder nutze die CLI:
+      <code>python -m tools.tune_run --config &lt;export.json&gt; --season 2024</code></div>`;
+  }
+}
+function renderResult(d,out){
+  const lbl={travel_km:['Reise',' km'],revenue_usd:['Revenue',' $'],fatigue_score:['Fatigue',''],
+    max_away_streak:['Auswärts-Streak',' T'],tv_slot_score:['TV-Score',''],
+    event_friction:['Friction',''],constraint_violations:['CBA-Verletzungen','']};
+  let rows='';
+  for(const k in lbl){const x=d.dimensions[k];const pct=x.pct==null?'—':(x.pct>0?'+':'')+x.pct+'%';
+    const col=x.verdict==='besser'?'var(--ok)':x.verdict==='schlechter'?'var(--bad)':'#5f6368';
+    rows+=`<tr><td>${lbl[k][0]}</td><td class="num">${fmt(x.real)}${lbl[k][1]}</td>
+      <td class="num">${fmt(x.ours)}${lbl[k][1]}</td><td class="num" style="color:${col}">${pct}</td>
+      <td style="color:${col}">${x.verdict}</td></tr>`;}
+  let wins='';
+  (d.windows||[]).forEach(w=>{const o=w.optimized,re=w.real;const dtv=(o.tv_slot_score-re.tv_slot_score);
+    wins+=`<tr><td>${w.name}</td><td class="num">${re.tv_slot_score.toFixed(0)}</td>
+      <td class="num">${o.tv_slot_score.toFixed(0)}</td>
+      <td class="num" style="color:${dtv>=0?'var(--ok)':'var(--bad)'}">${dtv>=0?'+':''}${dtv.toFixed(0)}</td></tr>`;});
+  out.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:#f0f2f5"><th style="text-align:left;padding:6px">Dimension</th>
+      <th class="num" style="padding:6px">realer Plan</th><th class="num" style="padding:6px">unser Plan</th>
+      <th class="num" style="padding:6px">Δ%</th><th style="padding:6px">Urteil</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    ${wins?`<h2 style="margin-top:14px">Pro Fenster — TV-Score</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:#f0f2f5"><th style="text-align:left;padding:6px">Phase</th>
+      <th class="num" style="padding:6px">real</th><th class="num" style="padding:6px">unser</th>
+      <th class="num" style="padding:6px">Δ</th></tr></thead><tbody>${wins}</tbody></table>`:''}
+    <p class="hint" style="margin-top:8px">Reise ${fmt(d.summary.travel_km)} km
+      (${d.summary.travel_vs_real_pct>0?'+':''}${d.summary.travel_vs_real_pct}% vs real) ·
+      CBA-konform: <b>${d.summary.cba_compliant?'JA':'NEIN'}</b></p>`;
+}
+window.computePlan=computePlan;
+
+buildGlobals(); addPhase(); addPhase({name:"Saisonende",start:"2024-09-16",end:"2024-09-30",mult:{tv:3.5,revenue:2.5,friction:1.0}}); refresh();
+</script>
+</body></html>

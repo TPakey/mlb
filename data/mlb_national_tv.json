@@ -1,0 +1,12 @@
+{
+  "_source": "MLB Stats API, schedule?hydrate=broadcasts(all) — punktuell verifizierte NATIONALE TV-Fakten für die Spiele, bei denen eine CBA-Ausnahme das Compliance-Urteil trägt (V(C)(8) ESPN-Sunday-Night-Ausnahme). Abgerufen 2026-06-11 (Sandbox-Review-Session, fields-projizierte Einzelabfrage). Rating: A je gelistetem Spiel (offizielles isNational-Flag). VOLLSTÄNDIGE Saison-Fakten: tools/fetch_broadcasts.py erzeugt data/mlb_broadcasts_<jahr>.json und ersetzt diese Punktliste.",
+  "_note": "Nur urteils-relevante Spiele (Roh-Treffer der V(C)(8)-Vollabdeckung). 2025-07-02 SDP@PHI braucht keinen TV-Fakt: Ausnahme greift über rescheduledFrom (Makeup of 7/1 PPD, Faktenfeld im Schedule-JSON).",
+  "national_tv_by_game_pk": {
+    "745736": {
+      "date": "2024-06-09",
+      "matchup": "LAD@NYY",
+      "national_tv": ["ESPN"],
+      "verified": "isNational=true, callSign=ESPN (2 Einträge ESPN/ESPN App); Sonntag, Lokal-Start 19:10 ET => ESPN Sunday Night Baseball, V(C)(8)-Ausnahme per CBA-Wortlaut"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "dimensions": {
+    "tv": {
+      "dimension": "tv",
+      "season_year": 2024,
+      "iterations": 80000,
+      "strong_weight": -3000.0,
+      "window_days": 14,
+      "real_window_metric": 105.07,
+      "n_window_games": 95,
+      "curve": [
+        {
+          "mult": 1.0,
+          "window_metric": 159.31,
+          "uplift_ratio": 1.5163,
+          "global_travel_km": 1684558,
+          "violations": 0
+        },
+        {
+          "mult": 2.0,
+          "window_metric": 163.27,
+          "uplift_ratio": 1.554,
+          "global_travel_km": 1684558,
+          "violations": 0
+        },
+        {
+          "mult": 4.0,
+          "window_metric": 163.9,
+          "uplift_ratio": 1.56,
+          "global_travel_km": 1684658,
+          "violations": 0
+        },
+        {
+          "mult": 8.0,
+          "window_metric": 164.32,
+          "uplift_ratio": 1.5639,
+          "global_travel_km": 1684658,
+          "violations": 0
+        }
+      ]
+    },
+    "revenue": {
+      "dimension": "revenue",
+      "season_year": 2024,
+      "iterations": 40000,
+      "strong_weight": -8e-06,
+      "window_days": 14,
+      "real_window_metric": 106242505.6,
+      "n_window_games": 95,
+      "curve": [
+        {
+          "mult": 1.0,
+          "window_metric": 160775937.11,
+          "uplift_ratio": 1.5133,
+          "global_travel_km": 1675578,
+          "violations": 0
+        },
+        {
+          "mult": 2.0,
+          "window_metric": 160775937.11,
+          "uplift_ratio": 1.5133,
+          "global_travel_km": 1675578,
+          "violations": 0
+        },
+        {
+          "mult": 4.0,
+          "window_metric": 160775937.11,
+          "uplift_ratio": 1.5133,
+          "global_travel_km": 1675578,
+          "violations": 0
+        },
+        {
+          "mult": 8.0,
+          "window_metric": 160775937.11,
+          "uplift_ratio": 1.5133,
+          "global_travel_km": 1675578,
+          "violations": 0
+        }
+      ]
+    }
+  },
+  "_meta": {
+    "method": "measured-grid + monotone interpolation",
+    "note": "Vorab-Schaetzungen; echte Werte via tools.tune_run / /tune/evaluate."
+  }
+}

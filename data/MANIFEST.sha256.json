@@ -1,0 +1,20 @@
+{
+  "_note": "Review-Runde 2 (Punkt 8, 2026-06-10): SHA256-Freeze-Manifest gegen stillen Datendrift. Der LocalFileAdapter prueft beim Laden und WARNT bei Abweichung (Abbruch waere zu hart: bewusste Daten-Updates muessen moeglich sein — dann Manifest via tools/verify_data_manifest.py --update erneuern).",
+  "files": {
+    "mlb_schedule_2024.json": "9733d248b6a6d1635eb91802f504d70ebedc49b5aa87e7ae962cafb40b18879b",
+    "mlb_schedule_2025.json": "5432ba43b927d4bbebf08cc90bcbe12c877b2b0f52624ddb15c2b98314fc12c8",
+    "teams.json": "81fb579d4cf0898c23ba17a40041e0594adef6fe37bb064c2a61de52e4c7bcbb",
+    "appendix_c_travel_times.json": "e0de3e86f19aa16f34293ea341c76f2cd66562820095b3345f1b9dab5aab38dc",
+    "mlb_national_tv.json": "163a6e81fb082bfe414ea82dfcdc376e924c52c73e23c684c7d55c52128c28d9",
+    "mlb_broadcasts_2024.json": "4cbc3f881a29a84c98e604963bffe144ad0aae87597838a22418f5a067297e89",
+    "mlb_broadcasts_2025.json": "b39b2525af4dd5ad220e50d842020581821147085212efac7c2393b8d97b33b8",
+    "mlb_broadcasts_2026.json": "a24b47072108b3fa71fbbaad5b5d67581bd607a96a7eda7b2a776dc96714aaf7",
+    "retrosheet/2024SKED.TXT": "497c39f579cbd6db685926cb4ea1efd0a4325f019d8da3b5ecb26dfc7e4c70a4",
+    "retrosheet/2025SKED.TXT": "9d2c372bdb10847fad064e3f40496a9ec9bdcd9b988799b61511ac9bfa30a42e",
+    "retrosheet/2026SKED.TXT": "e19cf7d97c849189dd1151f4cadb6bf77ab5bd9ec8952d6c95b681419fa168e6",
+    "local_events.json": "3d576cf3385758431382667550c040d5da39d752297e0398b5b958a26c7dea4e",
+    "forbes_team_financials_2025.json": "86249162cd5d9a56d3c4ca2c298c81f398fc81790c6c35209dfeef26ca5ef697",
+    "cotenant_sharing.json": "271f58ffe3b80cf877d2206f535482536b20f5b1e807c5b71dc061f28b3a62aa",
+    "gate_receipts_2024.json": "f5d69188c0b9b36c8b3fa4ee99f1cd0190e2d2d4d240a7d6093121216b6f19c8"
+  }
+}

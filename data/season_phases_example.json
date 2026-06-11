@@ -1,0 +1,23 @@
+{
+  "_comment": "Beispiel-Phasenplan fuer MLB Season Schedulers (Sprint 3). Jede Phase ist ein Zeitfenster mit Gewichts-Multiplikatoren je Zieldimension. Erlaubte Dimensionen (V1): revenue, tv, friction. Fehlende = 1.0 (neutral). Ueberlappende Phasen multiplizieren sich. Datumsformat YYYY-MM-DD, end inklusiv. Laden via src.phases.PhasePlan.load(pfad), nutzen via optimize_pareto(..., phase_plan=plan).",
+  "phases": [
+    {
+      "name": "Saisonstart (mehr Zuschauer, Opening-Wochen)",
+      "start": "2024-03-20",
+      "end": "2024-04-07",
+      "multipliers": { "tv": 3.0, "revenue": 2.0 }
+    },
+    {
+      "name": "Saisonende (Playoff-Rennen, hohe Aufmerksamkeit)",
+      "start": "2024-09-16",
+      "end": "2024-09-30",
+      "multipliers": { "tv": 3.5, "revenue": 2.5 }
+    },
+    {
+      "name": "Sommer-Hochbelastung (Stadtfeste vermeiden)",
+      "start": "2024-06-15",
+      "end": "2024-07-10",
+      "multipliers": { "friction": 4.0 }
+    }
+  ]
+}

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MLB Logistics Optimizer · Pareto Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  :root {
+    --bg:      #0b1220;
+    --panel:   #141d33;
+    --panel-2: #1c2746;
+    --border:  #233055;
+    --text:    #e8ecf6;
+    --muted:   #8a96b3;
+    --accent:  #4fc3f7;
+    --accent-2:#ffb74d;
+    --good:    #66bb6a;
+    --bad:     #ef5350;
+    --purple:  #ba68c8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+  }
+  header {
+    padding: 20px 32px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .back-btn {
+    padding: 7px 16px; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--muted); font-size: 13px; cursor: pointer;
+    text-decoration: none; display: inline-block;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ── Layout ── */
+  .layout { display: grid; grid-template-columns: 1fr 320px; gap: 0; height: calc(100vh - 65px); }
+
+  /* ── Chart Area ── */
+  .chart-area {
+    padding: 24px 28px; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .axis-controls {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .axis-group { display: flex; align-items: center; gap: 8px; }
+  .axis-group label { color: var(--muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  select {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 10px; border-radius: 8px; font-size: 13px; cursor: pointer;
+    appearance: none; padding-right: 28px;
+  }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: "▾"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); pointer-events: none; font-size: 11px;
+  }
+
+  #plot-container { flex: 1; position: relative; min-height: 0; }
+  svg { width: 100%; height: 100%; }
+
+  /* D3 styles */
+  .axis-line { stroke: var(--border); }
+  .grid-line { stroke: var(--border); stroke-opacity: 0.5; stroke-dasharray: 3,4; }
+  .axis-label { fill: var(--muted); font-size: 11px; }
+  .axis-title { fill: var(--muted); font-size: 12px; font-weight: 500; }
+  .pareto-line { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 5,4; opacity: 0.5; }
+  .dot { cursor: pointer; transition: r 0.15s, opacity 0.15s; }
+  .dot:hover { opacity: 1 !important; }
+  .dot-label {
+    fill: var(--text); font-size: 10px; pointer-events: none;
+    text-shadow: 0 0 4px #0b1220;
+  }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; pointer-events: none;
+    font-size: 12px; max-width: 260px; z-index: 100; display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  #tooltip .tt-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--accent); }
+  #tooltip .tt-profile { color: var(--muted); font-size: 11px; margin-bottom: 8px; }
+  #tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; margin: 3px 0; }
+  #tooltip .tt-dim { color: var(--muted); }
+  #tooltip .tt-val { font-weight: 500; }
+  #tooltip .tt-val.best { color: var(--good); }
+  #tooltip .tt-val.worst { color: var(--bad); }
+
+  /* ── Sidebar ── */
+  .sidebar { padding: 20px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+  .sidebar h2 { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Legend */
+  .legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .legend-item:hover { background: var(--panel-2); }
+  .legend-item.dimmed { opacity: 0.4; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Stats Table */
+  .stats-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+  }
+  .stats-card h3 { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px; }
+  .stat-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: var(--muted); }
+  .stat-val { font-weight: 500; }
+
+  /* Selected plan */
+  #selected-panel { background: var(--panel); border: 1px solid var(--accent); border-radius: 10px; padding: 14px; display: none; }
+  #selected-panel h3 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+  .dim-bar-row { margin: 5px 0; }
+  .dim-bar-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; }
+  .dim-bar-label span:first-child { color: var(--muted); }
+  .dim-bar-bg { height: 5px; background: var(--border); border-radius: 3px; }
+  .dim-bar-fill { height: 5px; border-radius: 3px; }
+  .use-btn {
+    margin-top: 12px; width: 100%; padding: 8px; background: var(--accent); color: #0b1220;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .use-btn:hover { opacity: 0.85; }
+
+  .info-badge {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 11px; color: var(--muted); line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚾ Pareto Explorer — Schedule Tradeoff Analysis</h1>
+    <div class="sub">Nicht-dominierte Pläne auf der 8-dimensionalen Pareto-Front · Sprint 2.3b</div>
+  </div>
+  <a href="index.html" class="back-btn">← Dashboard</a>
+</header>
+
+<div class="layout">
+  <!-- ── Chart ── -->
+  <div class="chart-area">
+    <div class="axis-controls">
+      <div class="axis-group">
+        <label>X-Achse</label>
+        <div class="select-wrap">
+          <select id="x-axis">
+            <option value="travel_km">Travel km</option>
+            <option value="revenue_usd">Revenue USD</option>
+            <option value="fatigue_score" selected>Fatigue Score</option>
+            <option value="max_away_streak">Max Away Streak</option>
+            <option value="off_day_variance">Off-Day Variance</option>
+            <option value="tv_slot_score">TV Slot Score</option>
+            <option value="event_friction">Event Friction</option>
+          </select>
+        </div>
+      </div>
+      <div class="axis-group">
+        <label>Y-Achse</label>
+        <div class="select-wrap">
+          <select id="y-axis">
+            <option value="travel_km" selected>Travel km</option>
+            <option value="revenue_usd">Revenue USD</option>
+            <option value="fatigue_score">Fatigue Score</option>
+            <option value="max_away_streak">Max Away Streak</option>
+            <option value="off_day_variance">Off-Day Variance</option>
+            <option value="tv_slot_score">TV Slot Score</option>
+            <option value="event_friction">Event Friction</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+        <span style="font-size:12px; color: var(--muted);" id="point-count"></span>
+        <button onclick="resetView()" style="padding:6px 12px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; cursor:pointer; font-size:12px;">Reset</button>
+      </div>
+    </div>
+    <div id="plot-container"></div>
+  </div>
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+    <div>
+      <h2>Profile / Legende</h2>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="stats-card">
+      <h3>Frontier Statistik</h3>
+      <div class="stat-row"><span class="stat-label">Nicht-dominierte Pläne</span><span class="stat-val" id="stat-nd">—</span></div>
+      <div class="stat-row"><span class="stat-label">Gesamt evaluiert</span><span class="stat-val" id="stat-total">—</span></div>
+      <div class="stat-row"><span class="stat-label">Master Seed</span><span class="stat-val" id="stat-seed">—</span></div>
+      <div class="stat-row"><span class="stat-label">Generierungszeit</span><span class="stat-val" id="stat-time">—</span></div>
+      <div class="stat-row"><span class="stat-label">Travel-Spanne</span><span class="stat-val" id="stat-km">—</span></div>
+      <div class="stat-row"><span class="stat-label">Revenue-Spanne</span><span class="stat-val" id="stat-rev">—</span></div>
+    </div>
+
+    <div id="selected-panel">
+      <h3 id="selected-title">Plan auswählen</h3>
+      <div id="dim-bars"></div>
+      <button class="use-btn" onclick="copyProfile()">📋 Profil kopieren</button>
+    </div>
+
+    <div class="info-badge">
+      <strong>Hinweis:</strong> Diese Daten wurden mit <code>demo_pareto.py</code> generiert.
+      Alle Pläne sind nicht-dominiert — kein Plan ist in allen 8 Dimensionen schlechter als ein anderer.
+      Hover über einen Punkt für Details, klicken für Vollansicht.
+    </div>
+  </div>
+</div>
+
+<!-- ── Tooltip ── -->
+<div id="tooltip"></div>
+
+<!-- ── DEMO-DATEN-BANNER (Audit A12, Sprint A-3) ──
+     Solange `pareto.html` ohne separaten Daten-Load geöffnet wird, zeigt es
+     hardcodierte Beispielwerte. Echtes Pareto-Ergebnis live laden:
+       1. `python -m tools.demo_pareto --json-out output/pareto_latest.json`
+       2. In der URL `?data=../output/pareto_latest.json` anhängen.
+-->
+<div id="demo-banner" style="
+  background: #5a3f08; color: #ffd87a; padding: 10px 16px;
+  font-size: 13px; border-bottom: 1px solid #8a6b1f; text-align: center;">
+  ⚠️ <b>Demo-Daten</b> — diese Werte sind nicht aus einem echten Pareto-Lauf.
+  Anleitung für Live-Daten siehe HTML-Kommentar oben.
+</div>
+<script>
+// Audit A12 (Sprint A-3): wenn `?data=...` gesetzt ist, laden wir das echte
+// pareto_demo_*.json und blenden das Demo-Banner aus. Sonst zeigen wir die
+// repräsentativen Sample-Daten unten als Fallback.
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const dataUrl = params.get("data");
+  if (!dataUrl) return;
+  fetch(dataUrl)
+    .then(r => r.json())
+    .then(d => {
+      window.PARETO_DATA = d;
+      const b = document.getElementById("demo-banner");
+      if (b) b.style.display = "none";
+      // Optional: window.dispatchEvent(new Event("pareto-data-ready"))
+      window.location.reload(); // einfachster Weg zur Re-Render-Initialisierung
+    })
+    .catch(e => console.error("Pareto-Daten-Load fehlgeschlagen:", e));
+})();
+</script>
+
+<!-- ── Embedded Pareto Data (Fallback / Demo) ── -->
+<script>
+// window.PARETO_DATA wird vom Loader oben überschrieben, sonst greifen die
+// repräsentativen Sample-Daten hier — siehe Demo-Banner.
+window.PARETO_DATA = window.PARETO_DATA || {
+  meta: {
+    n_non_dominated: 9,
+    n_total_evaluated: 9,
+    master_seed: 42,
+    total_wall_time_s: 45.2,
+    anchor_labels: [
+      "anchor_balanced", "anchor_travel_min", "anchor_revenue_max",
+      "anchor_player_friendly", "anchor_tv_optimized", "anchor_city_friendly"
+    ]
+  },
+  points: [
+    {
+      label: "anchor_balanced",
+      profile_used: "Balanced",
+      bundle: {
+        travel_km: 1_980_000, revenue_usd: 7_820_000_000, fatigue_score: 8_450,
+        max_away_streak: 11, off_day_variance: 0.0042, tv_slot_score: 2_870,
+        event_friction: 142, constraint_violations: 0
+      }
+    },
+    {
+      label: "anchor_travel_min",
+      profile_used: "Travel Minimizer",
+      bundle: {
+        travel_km: 1_820_000, revenue_usd: 7_640_000_000, fatigue_score: 9_200,
+        max_away_streak: 12, off_day_variance: 0.0055, tv_slot_score: 2_710,
+        event_friction: 158, constraint_violations: 0
+      }
+    },
+    {
+      label: "anchor_revenue_max",
+      profile_used: "Revenue Max",
+      bundle: {
+        travel_km: 2_140_000, revenue_usd: 8_180_000_000, fatigue_score: 9_800,
+        max_away_streak: 13, off_day_variance: 0.0048, tv_slot_score: 3_020,
+        event_friction: 171, constraint_violations: 0
+      }
+    },
+    {
+      label: "anchor_player_friendly",
+      profile_used: "Player-Friendly",
+      bundle: {
+        travel_km: 2_020_000, revenue_usd: 7_710_000_000, fatigue_score: 6_100,
+        max_away_streak: 9, off_day_variance: 0.0031, tv_slot_score: 2_650,
+        event_friction: 138, constraint_violations: 0
+      }
+    },
+    {
+      label: "anchor_tv_optimized",
+      profile_used: "TV Optimized",
+      bundle: {
+        travel_km: 2_090_000, revenue_usd: 8_050_000_000, fatigue_score: 9_400,
+        max_away_streak: 12, off_day_variance: 0.0051, tv_slot_score: 3_180,
+        event_friction: 164, constraint_violations: 0
+      }
+    },
+    {
+      label: "anchor_city_friendly",
+      profile_used: "City-Friendly",
+      bundle: {
+        travel_km: 1_960_000, revenue_usd: 7_780_000_000, fatigue_score: 8_700,
+        max_away_streak: 11, off_day_variance: 0.0044, tv_slot_score: 2_800,
+        event_friction: 98, constraint_violations: 0
+      }
+    },
+    {
+      label: "interior_0",
+      profile_used: "interior_0",
+      bundle: {
+        travel_km: 1_900_000, revenue_usd: 7_920_000_000, fatigue_score: 7_800,
+        max_away_streak: 10, off_day_variance: 0.0038, tv_slot_score: 2_940,
+        event_friction: 120, constraint_violations: 0
+      }
+    },
+    {
+      label: "interior_1",
+      profile_used: "interior_1",
+      bundle: {
+        travel_km: 2_050_000, revenue_usd: 7_990_000_000, fatigue_score: 7_200,
+        max_away_streak: 10, off_day_variance: 0.0036, tv_slot_score: 2_990,
+        event_friction: 110, constraint_violations: 0
+      }
+    },
+    {
+      label: "interior_2",
+      profile_used: "interior_2",
+      bundle: {
+        travel_km: 1_860_000, revenue_usd: 7_850_000_000, fatigue_score: 8_100,
+        max_away_streak: 11, off_day_variance: 0.0040, tv_slot_score: 2_860,
+        event_friction: 105, constraint_violations: 0
+      }
+    }
+  ]
+};
+</script>
+
+<script>
+// ── Dimension-Konfiguration ──────────────────────────────────────────
+const DIM_CONFIG = {
+  travel_km:        { label: "Travel km",         fmt: v => (v/1e6).toFixed(2)+"M",   minimize: true  },
+  revenue_usd:      { label: "Revenue USD",        fmt: v => "$"+(v/1e9).toFixed(2)+"B", minimize: false },
+  fatigue_score:    { label: "Fatigue Score",      fmt: v => v.toLocaleString(),         minimize: true  },
+  max_away_streak:  { label: "Max Away Streak",    fmt: v => v+" d",                     minimize: true  },
+  off_day_variance: { label: "Off-Day Variance",   fmt: v => v.toFixed(4),               minimize: true  },
+  tv_slot_score:    { label: "TV Slot Score",      fmt: v => v.toLocaleString(),         minimize: false },
+  event_friction:   { label: "Event Friction",     fmt: v => v.toFixed(0),               minimize: true  },
+};
+
+// ── Profil-Farben ────────────────────────────────────────────────────
+const PROFILE_COLORS = {
+  "Balanced":        "#4fc3f7",
+  "Travel Minimizer":"#66bb6a",
+  "Revenue Max":     "#ffb74d",
+  "Player-Friendly": "#f06292",
+  "TV Optimized":    "#ce93d8",
+  "City-Friendly":   "#80cbc4",
+};
+const INTERIOR_COLOR = "#8a96b3";
+const ANCHOR_LABELS = new Set(window.PARETO_DATA.meta.anchor_labels);
+
+function pointColor(p) {
+  if (ANCHOR_LABELS.has(p.label)) {
+    return PROFILE_COLORS[p.profile_used] || "#aaa";
+  }
+  return INTERIOR_COLOR;
+}
+function isAnchor(p) { return ANCHOR_LABELS.has(p.label); }
+
+// ── State ────────────────────────────────────────────────────────────
+let xDim = "fatigue_score";
+let yDim = "travel_km";
+let selectedPoint = null;
+let hiddenProfiles = new Set();
+const data = window.PARETO_DATA;
+
+// ── Meta / Stats ─────────────────────────────────────────────────────
+document.getElementById("stat-nd").textContent    = data.meta.n_non_dominated;
+document.getElementById("stat-total").textContent = data.meta.n_total_evaluated;
+document.getElementById("stat-seed").textContent  = data.meta.master_seed;
+document.getElementById("stat-time").textContent  =
+  data.meta.total_wall_time_s < 60
+    ? data.meta.total_wall_time_s.toFixed(1)+"s"
+    : (data.meta.total_wall_time_s/60).toFixed(1)+"min";
+
+function updateStats() {
+  const vis = visiblePoints();
+  if (!vis.length) return;
+  const kms  = vis.map(p => p.bundle.travel_km);
+  const revs = vis.map(p => p.bundle.revenue_usd);
+  document.getElementById("stat-km").textContent =
+    (Math.min(...kms)/1e6).toFixed(2)+"M–"+(Math.max(...kms)/1e6).toFixed(2)+"M km";
+  document.getElementById("stat-rev").textContent =
+    "$"+(Math.min(...revs)/1e9).toFixed(2)+"B–$"+(Math.max(...revs)/1e9).toFixed(2)+"B";
+  document.getElementById("point-count").textContent =
+    vis.length+" von "+data.points.length+" Plänen";
+}
+
+// ── Legend ───────────────────────────────────────────────────────────
+function buildLegend() {
+  const container = document.getElementById("legend");
+  container.innerHTML = "";
+  // Anchor profiles
+  Object.entries(PROFILE_COLORS).forEach(([name, color]) => {
+    const div = document.createElement("div");
+    div.className = "legend-item" + (hiddenProfiles.has(name) ? " dimmed" : "");
+    div.innerHTML = `<div class="legend-dot" style="background:${color}"></div><span>${name}</span>`;
+    div.onclick = () => {
+      if (hiddenProfiles.has(name)) hiddenProfiles.delete(name);
+      else hiddenProfiles.add(name);
+      buildLegend();
+      render();
+    };
+    container.appendChild(div);
+  });
+  // Interior
+  const div = document.createElement("div");
+  div.className = "legend-item" + (hiddenProfiles.has("_interior") ? " dimmed" : "");
+  div.innerHTML = `<div class="legend-dot" style="background:${INTERIOR_COLOR}; border: 1px solid #555;"></div><span>Interior Points</span>`;
+  div.onclick = () => {
+    if (hiddenProfiles.has("_interior")) hiddenProfiles.delete("_interior");
+    else hiddenProfiles.add("_interior");
+    buildLegend();
+    render();
+  };
+  container.appendChild(div);
+}
+
+function visiblePoints() {
+  return data.points.filter(p => {
+    if (isAnchor(p)) return !hiddenProfiles.has(p.profile_used);
+    return !hiddenProfiles.has("_interior");
+  });
+}
+
+// ── D3 Plot ──────────────────────────────────────────────────────────
+let svgEl = null;
+
+function render() {
+  const container = document.getElementById("plot-container");
+  const W = container.clientWidth || 800;
+  const H = container.clientHeight || 480;
+  const M = { top: 20, right: 30, bottom: 50, left: 70 };
+  const iW = W - M.left - M.right;
+  const iH = H - M.top - M.bottom;
+
+  if (svgEl) svgEl.remove();
+  const svg = d3.select("#plot-container").append("svg")
+    .attr("width", W).attr("height", H);
+  svgEl = svg.node();
+  const g = svg.append("g").attr("transform", `translate(${M.left},${M.top})`);
+
+  const pts = visiblePoints();
+  if (!pts.length) return;
+
+  const xVals = pts.map(p => p.bundle[xDim]);
+  const yVals = pts.map(p => p.bundle[yDim]);
+  const xExt = d3.extent(xVals);
+  const yExt = d3.extent(yVals);
+  const pad = (ext) => {
+    const r = ext[1] - ext[0];
+    return [ext[0] - r*0.1, ext[1] + r*0.1];
+  };
+
+  const xScale = d3.scaleLinear().domain(pad(xExt)).range([0, iW]);
+  const yScale = d3.scaleLinear().domain(pad(yExt)).range([iH, 0]);
+
+  // Grid lines
+  const xTicks = xScale.ticks(6);
+  const yTicks = yScale.ticks(6);
+  xTicks.forEach(t => {
+    g.append("line").attr("class","grid-line")
+      .attr("x1", xScale(t)).attr("x2", xScale(t)).attr("y1", 0).attr("y2", iH);
+  });
+  yTicks.forEach(t => {
+    g.append("line").attr("class","grid-line")
+      .attr("x1", 0).attr("x2", iW).attr("y1", yScale(t)).attr("y2", yScale(t));
+  });
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).ticks(6).tickFormat(v => DIM_CONFIG[xDim].fmt(v));
+  const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(v => DIM_CONFIG[yDim].fmt(v));
+  g.append("g").attr("transform", `translate(0,${iH})`).call(xAxis)
+    .selectAll("text").attr("fill", "var(--muted)").style("font-size","11px");
+  g.append("g").call(yAxis)
+    .selectAll("text").attr("fill", "var(--muted)").style("font-size","11px");
+  g.selectAll(".domain").attr("stroke", "var(--border)");
+  g.selectAll(".tick line").attr("stroke", "var(--border)");
+
+  // Axis titles
+  g.append("text").attr("class","axis-title")
+    .attr("x", iW/2).attr("y", iH + 42).attr("text-anchor","middle")
+    .text(DIM_CONFIG[xDim].label + (DIM_CONFIG[xDim].minimize ? " ↓ besser" : " ↑ besser"));
+  g.append("text").attr("class","axis-title")
+    .attr("transform","rotate(-90)")
+    .attr("x", -iH/2).attr("y", -56).attr("text-anchor","middle")
+    .text(DIM_CONFIG[yDim].label + (DIM_CONFIG[yDim].minimize ? " ↓ besser" : " ↑ besser"));
+
+  // Pareto front line (sorted by x-dim)
+  const sortedAnchorPts = pts.filter(isAnchor).sort((a,b) => a.bundle[xDim] - b.bundle[xDim]);
+  if (sortedAnchorPts.length >= 2) {
+    const line = d3.line()
+      .x(p => xScale(p.bundle[xDim]))
+      .y(p => yScale(p.bundle[yDim]))
+      .curve(d3.curveLinear);
+    g.append("path").datum(sortedAnchorPts)
+      .attr("class","pareto-line").attr("d", line);
+  }
+
+  // Points
+  const tooltip = document.getElementById("tooltip");
+  pts.forEach(p => {
+    const cx = xScale(p.bundle[xDim]);
+    const cy = yScale(p.bundle[yDim]);
+    const r  = isAnchor(p) ? 9 : 6;
+    const col = pointColor(p);
+    const isSelected = selectedPoint && selectedPoint.label === p.label;
+
+    const circle = g.append("circle")
+      .attr("class","dot")
+      .attr("cx", cx).attr("cy", cy).attr("r", isSelected ? r+3 : r)
+      .attr("fill", col)
+      .attr("stroke", isSelected ? "#fff" : col)
+      .attr("stroke-width", isSelected ? 2 : 0)
+      .attr("opacity", isSelected ? 1 : (isAnchor(p) ? 0.85 : 0.55));
+
+    // Label for anchor points
+    if (isAnchor(p)) {
+      g.append("text").attr("class","dot-label")
+        .attr("x", cx + 12).attr("y", cy + 4)
+        .text(p.profile_used.split(" ")[0]);
+    }
+
+    // Hover
+    circle.on("mousemove", function(event) {
+      tooltip.style.display = "block";
+      tooltip.style.left = (event.clientX + 14) + "px";
+      tooltip.style.top  = (event.clientY - 10) + "px";
+      tooltip.innerHTML = buildTooltip(p);
+    }).on("mouseleave", function() {
+      tooltip.style.display = "none";
+    }).on("click", function() {
+      selectedPoint = (selectedPoint && selectedPoint.label === p.label) ? null : p;
+      render();
+      updateSelectedPanel();
+    });
+  });
+
+  updateStats();
+}
+
+function buildTooltip(p) {
+  const b = p.bundle;
+  const rows = Object.entries(DIM_CONFIG).map(([key, cfg]) => {
+    const v = b[key];
+    const all = data.points.map(pp => pp.bundle[key]);
+    const isBest = cfg.minimize ? v === Math.min(...all) : v === Math.max(...all);
+    const isWorst = cfg.minimize ? v === Math.max(...all) : v === Math.min(...all);
+    const cls = isBest ? "best" : isWorst ? "worst" : "";
+    return `<div class="tt-row">
+      <span class="tt-dim">${cfg.label}</span>
+      <span class="tt-val ${cls}">${cfg.fmt(v)}</span>
+    </div>`;
+  }).join("");
+  return `<div class="tt-title">${p.label}</div>
+    <div class="tt-profile">Profil: ${p.profile_used}</div>
+    ${rows}`;
+}
+
+// ── Selected Panel ───────────────────────────────────────────────────
+function updateSelectedPanel() {
+  const panel = document.getElementById("selected-panel");
+  if (!selectedPoint) { panel.style.display = "none"; return; }
+  panel.style.display = "block";
+  document.getElementById("selected-title").textContent = selectedPoint.label;
+  const b = selectedPoint.bundle;
+  const bars = document.getElementById("dim-bars");
+  bars.innerHTML = "";
+
+  const allBundles = data.points.map(p => p.bundle);
+
+  Object.entries(DIM_CONFIG).forEach(([key, cfg]) => {
+    const vals = allBundles.map(bnd => bnd[key]);
+    const min_ = Math.min(...vals);
+    const max_ = Math.max(...vals);
+    const v    = b[key];
+    const frac = max_ === min_ ? 0.5 : (v - min_) / (max_ - min_);
+    // For "minimize" dims: lower is better → bar closer to left = better
+    // We show "goodness": for minimize → (1-frac), for maximize → frac
+    const goodness = cfg.minimize ? 1 - frac : frac;
+    const col = d3.interpolateRgb("#ef5350", "#66bb6a")(goodness);
+
+    const row = document.createElement("div");
+    row.className = "dim-bar-row";
+    row.innerHTML = `
+      <div class="dim-bar-label">
+        <span>${cfg.label}</span>
+        <span>${cfg.fmt(v)}</span>
+      </div>
+      <div class="dim-bar-bg">
+        <div class="dim-bar-fill" style="width:${(goodness*100).toFixed(0)}%; background:${col};"></div>
+      </div>`;
+    bars.appendChild(row);
+  });
+}
+
+function copyProfile() {
+  if (!selectedPoint) return;
+  const text = JSON.stringify({
+    profile: selectedPoint.profile_used,
+    label: selectedPoint.label,
+    bundle: selectedPoint.bundle
+  }, null, 2);
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".use-btn");
+    btn.textContent = "✓ Kopiert!";
+    setTimeout(() => btn.textContent = "📋 Profil kopieren", 1500);
+  });
+}
+
+function resetView() {
+  selectedPoint = null;
+  hiddenProfiles.clear();
+  buildLegend();
+  render();
+  updateSelectedPanel();
+}
+
+// ── Axis Selectors ───────────────────────────────────────────────────
+document.getElementById("x-axis").addEventListener("change", e => {
+  xDim = e.target.value;
+  render();
+});
+document.getElementById("y-axis").addEventListener("change", e => {
+  yDim = e.target.value;
+  render();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────
+buildLegend();
+render();
+updateStats();
+window.addEventListener("resize", () => render());
+</script>
+</body>
+</html>

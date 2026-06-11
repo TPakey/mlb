@@ -1,0 +1,158 @@
+{
+ "_source": "Forbes-'Business of Baseball'-Gate-Receipts je Team, erhoben über die frei einsehbaren Statista-Teasertexte der Einzelseiten (je Team eine Quelle, URLs unten; abgerufen 2026-06-11). Rating B+ (Sekundär-Mirror der Forbes-Primärschätzung, Wert je Team einzeln zitiert).",
+ "_definition": "Forbes-Definition: Ticketing/Gate OHNE Premium-Seating-Anteile. Abgleich: MLBs INTERNER Gate-Report (via Sportico, 2025-05-30) liegt inkl. Premium höher — Anker unten. Konsistenzcheck: Summe der 28 Werte ab 2023 = 3228 Mio USD, plausibel zur bekannten Liga-Gate-Größenordnung ~3.410 Mio (validate_revenue_model).",
+ "_gaps": "TEX und CLE: 2024-Teaser paywalled; letztbekannte Werte 2021 (94/35) NUR informativ, nicht in Validierungs-Spearman (Jahr < 2023). BOS/CHC/ARI/DET: 2023er-Werte (Teaser hinkt nach).",
+ "_sportico_internal_anchors_2024": {
+  "_source": "MLB-interner Gate-Report via Sportico (Badenhausen, 2025-05-30) — inkl. Premium-Seating",
+  "gate_per_home_game_musd": {
+   "LAD": 4.29,
+   "NYY": 4.11,
+   "CHC": 3.25,
+   "BOS": 2.93,
+   "HOU": 2.69
+  },
+  "bottom_teams_per_game_musd": 0.5,
+  "avg_ticket_price_usd": {
+   "NYY": 99,
+   "CHC": 90,
+   "BOS": 87,
+   "LAD": 87,
+   "HOU": 77,
+   "NYM": 66,
+   "TEX": 60
+  },
+  "season_total_over_300_musd": [
+   "LAD",
+   "NYY"
+  ],
+  "avg_paid_attendance": {
+   "LAD": 49067,
+   "NYY": 41631
+  }
+ },
+ "gate_receipts_by_team": {
+  "ARI": {
+   "musd": 78,
+   "year": 2023
+  },
+  "ATL": {
+   "musd": 179,
+   "year": 2024
+  },
+  "BAL": {
+   "musd": 88,
+   "year": 2024
+  },
+  "BOS": {
+   "musd": 186,
+   "year": 2023
+  },
+  "CHC": {
+   "musd": 194,
+   "year": 2023
+  },
+  "CIN": {
+   "musd": 67,
+   "year": 2024
+  },
+  "CLE": {
+   "musd": 35,
+   "year": 2021
+  },
+  "COL": {
+   "musd": 77,
+   "year": 2024
+  },
+  "CWS": {
+   "musd": 44,
+   "year": 2024
+  },
+  "DET": {
+   "musd": 51,
+   "year": 2023
+  },
+  "HOU": {
+   "musd": 201,
+   "year": 2024
+  },
+  "KCR": {
+   "musd": 57,
+   "year": 2024
+  },
+  "LAA": {
+   "musd": 117,
+   "year": 2024
+  },
+  "LAD": {
+   "musd": 211,
+   "year": 2024
+  },
+  "MIA": {
+   "musd": 57,
+   "year": 2024
+  },
+  "MIL": {
+   "musd": 83,
+   "year": 2024
+  },
+  "MIN": {
+   "musd": 81,
+   "year": 2024
+  },
+  "NYM": {
+   "musd": 131,
+   "year": 2024
+  },
+  "NYY": {
+   "musd": 333,
+   "year": 2024
+  },
+  "OAK": {
+   "musd": 28,
+   "year": 2024
+  },
+  "PHI": {
+   "musd": 148,
+   "year": 2024
+  },
+  "PIT": {
+   "musd": 57,
+   "year": 2024
+  },
+  "SDP": {
+   "musd": 123,
+   "year": 2024
+  },
+  "SEA": {
+   "musd": 117,
+   "year": 2024
+  },
+  "SFG": {
+   "musd": 135,
+   "year": 2024
+  },
+  "STL": {
+   "musd": 134,
+   "year": 2024
+  },
+  "TBR": {
+   "musd": 48,
+   "year": 2024
+  },
+  "TEX": {
+   "musd": 94,
+   "year": 2021
+  },
+  "TOR": {
+   "musd": 92,
+   "year": 2024
+  },
+  "WSN": {
+   "musd": 111,
+   "year": 2024
+  }
+ },
+ "statista_urls": {
+  "_siehe_Suchprotokoll_im_Chat_2026-06-11": "https://www.statista.com/statistics/.../_siehe_suchprotokoll_im_chat_2026-06-11-gate-receipts/"
+ }
+}

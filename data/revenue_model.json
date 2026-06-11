@@ -1,0 +1,81 @@
+{
+  "_source": "docs/REVENUE_MODEL_RESEARCH.md",
+  "_calibrated_for_season": 2024,
+  "_applied_to_season": 2026,
+  "_unit": "USD",
+  "_note": "base_team[t] = erwarteter Gate-Revenue pro Heimspiel bei neutralen Bedingungen. Werte aus Sportico/Statista 2024, Liga-Mittel ca. 1,4 Mio USD.",
+  "_calibration_warning": "N12 (Sprint 2.9): Modell ist auf 2024-Daten kalibriert, wird aber fuer 2026 verwendet (2-Jahres-Extrapolation). Inflation, neue TV-Vertraege (Apple TV+, lokale Deals nach Bally-Sports-Insolvenz) und Stadionrenovierungen verschieben den Gate-Revenue. Vor MLB-Uebergabe auf 2025-Daten (falls verfuegbar) neu eichen; idealerweise pro Saison kalibrierbar machen.",
+  "base_team": {
+    "LAD": 3332000.0,
+    "NYY": 3185000.0,
+    "CHC": 2325000.0,
+    "BOS": 2092000.0,
+    "SFG": 1938000.0,
+    "SDP": 1705000.0,
+    "ATL": 1628000.0,
+    "HOU": 1550000.0,
+    "PHI": 1472000.0,
+    "NYM": 1472000.0,
+    "TEX": 1395000.0,
+    "STL": 1318000.0,
+    "SEA": 1240000.0,
+    "MIN": 1162000.0,
+    "TOR": 1162000.0,
+    "LAA": 1085000.0,
+    "WSN": 1008000.0,
+    "BAL": 1008000.0,
+    "MIL": 930000.0,
+    "ARI": 930000.0,
+    "CIN": 852000.0,
+    "COL": 852000.0,
+    "DET": 852000.0,
+    "KCR": 775000.0,
+    "CWS": 698000.0,
+    "CLE": 698000.0,
+    "PIT": 659000.0,
+    "MIA": 620000.0,
+    "TBR": 581000.0,
+    "OAK": 542000.0
+  },
+  "weekday_factor": {
+    "0": 0.97,
+    "1": 0.89,
+    "2": 0.96,
+    "3": 0.98,
+    "4": 1.05,
+    "5": 1.16,
+    "6": 1.08
+  },
+  "_weekday_factor_note": "Python weekday(): 0=Mo, 1=Di, 2=Mi, 3=Do, 4=Fr, 5=Sa, 6=So",
+  "month_factor": {
+    "3": 0.8,
+    "4": 0.85,
+    "5": 0.95,
+    "6": 1.05,
+    "7": 1.15,
+    "8": 1.12,
+    "9": 0.95,
+    "10": 0.85
+  },
+  "daypart_factor": {
+    "day": 0.95,
+    "night": 1.02
+  },
+  "daypart_factor_sunday": {
+    "day": 1.0,
+    "night": 0.95
+  },
+  "opponent_draw_factor": {
+    "NYY": 1.2,
+    "LAD": 1.18,
+    "BOS": 1.12,
+    "CHC": 1.08,
+    "default": 1.0,
+    "division_rival_bonus": 1.05
+  },
+  "doubleheader_penalty": {
+    "none": 1.0,
+    "single_admission": 0.55,
+    "split_admission": 0.9
+  }
+}

@@ -1,0 +1,91 @@
+name: Tests
+
+# Review-Runde 2 (Punkt 7, 2026-06-10): Die ~50 `slow`-Tests (CP-SAT-
+# Vollgenerierung, HAP-Solver, Pareto-Budgets, SA-Property-Garantien) tragen
+# die stärksten Aussagen des Projekts. Vorher hingen sie am Push-Job mit
+# 25-min-Timeout (unrealistisch — und das Repo lief nie unter CI). Jetzt:
+# Push/PR = schnelle Suite + Validatoren; slow = NIGHTLY (Cron) bzw. manuell
+# (workflow_dispatch). Lokal: tools/run_slow_suite.sh.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *"    # nightly 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  fast-tests:
+    name: Schnelle Tests (Unit + Property, ohne Generator-Runs)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Daten-Manifest prüfen (Drift-Schutz, Punkt 8)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m tools.verify_data_manifest
+      - name: Lint
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m pyflakes src/ tools/ || true
+      - name: Pytest (fast)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          pytest -m "not slow and not integration" \
+                 --maxfail=1 --tb=short
+
+  validators:
+    name: Validatoren (Revenue + TV)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: fast-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m tools.validate_revenue_model
+
+  nightly-slow:
+    name: Nightly — volle Suite inkl. slow (CP-SAT/HAP/Pareto/SA-Garantien)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install gurobipy || true   # Restricted reicht für Größenlimit-Tests
+      - name: Daten-Manifest prüfen (Punkt 8)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m tools.verify_data_manifest
+      - name: Pytest (voll, inkl. slow)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: pytest -q -p no:cacheprovider --durations=20 --tb=short

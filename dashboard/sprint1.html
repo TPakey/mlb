@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<title>MLB Logistics Optimizer · Sprint 1 Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1220; --panel: #141d33; --panel-2: #1c2746;
+    --text: #e8ecf6; --muted: #8a96b3;
+    --accent: #4fc3f7; --gold: #ffb74d;
+    --good: #66bb6a; --bad: #ef5350; --border: #233055;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); line-height: 1.5; }
+  header { padding: 24px 32px; border-bottom: 1px solid var(--border);
+           display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  .badge { display: inline-block; padding: 4px 10px; background: var(--panel-2); border-radius: 12px; font-size: 11px; color: var(--muted); margin-left: 8px; }
+  .badge.honest { background: rgba(102,187,106,0.15); color: var(--good); }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); padding: 24px 32px; }
+  .card { background: var(--panel); border-radius: 12px; padding: 16px 20px; border: 1px solid var(--border); }
+  .card h2 { margin: 0 0 12px; font-size: 13px; color: var(--muted); font-weight: 500;
+             text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi { font-size: 28px; font-weight: 600; }
+  .kpi .delta { font-size: 14px; margin-left: 8px; color: var(--good); }
+  .span-3 { grid-column: span 3; }
+  .span-4 { grid-column: span 4; }
+  .span-6 { grid-column: span 6; }
+  .span-8 { grid-column: span 8; }
+  .span-12 { grid-column: span 12; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .pill { padding: 6px 14px; background: var(--panel-2); border: 1px solid #2c3a64;
+          border-radius: 999px; cursor: pointer; color: var(--text); font-size: 13px; }
+  .pill.active { background: var(--accent); color: #082138; border-color: var(--accent); font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.team { font-weight: 600; }
+  .legend { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .map-wrap { position: relative; height: 380px; background: #0e1730; border-radius: 8px; overflow: hidden; }
+  .anecdote { padding: 12px 16px; margin: 8px 0; background: var(--panel-2);
+              border-left: 3px solid var(--gold); border-radius: 4px; font-size: 13px; }
+  .anecdote .head { font-weight: 600; color: var(--gold); margin-bottom: 4px; }
+  .anecdote .route { font-family: Consolas, Monaco, monospace; color: var(--text); margin: 2px 0; }
+  .anecdote .savings { color: var(--good); font-weight: 600; margin-top: 4px; }
+  .truth-callout { padding: 16px 20px; background: rgba(255,183,77,0.08); border-left: 4px solid var(--gold); border-radius: 4px; margin-bottom: 16px; }
+  .truth-callout .title { font-weight: 600; color: var(--gold); font-size: 14px; margin-bottom: 6px; }
+  .truth-callout .body { color: var(--text); font-size: 13px; line-height: 1.6; }
+  .footer { padding: 16px 32px; color: var(--muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>MLB Logistics Optimizer <span class="badge honest">Sprint 1 · echte Daten</span></h1>
+    <div class="sub">Validierung gegen offiziellen MLB-Saisonkalender · Quelle: MLB Stats API</div>
+  </div>
+  <div class="controls">
+    <span style="color:var(--muted);font-size:13px;">Saison:</span>
+    <button class="pill active" data-year="2024">2024</button>
+    <button class="pill" data-year="2025">2025</button>
+  </div>
+</header>
+
+<div class="grid">
+
+  <div class="truth-callout span-12">
+    <div class="title">Sprint-1-Kernbefund — ehrlich</div>
+    <div class="body">
+      Über zwei volle Saisons (4.864 echte Spiele) sind <strong>92 % der Road Trips bereits TSP-optimal</strong> geroutet.
+      Theoretisches Einsparpotenzial allein durch bessere Trip-Reihenfolge: <strong>~1 %</strong> der Gesamtreisedistanz.
+      MLB macht das gut. Die <em>echte</em> Optimierungs-Headroom liegt in der koordinierten Schedule-Restrukturierung —
+      Sprint 2.
+    </div>
+  </div>
+
+  <div class="card span-3">
+    <h2>Original-km (alle 30 Teams)</h2>
+    <div class="kpi" id="k-orig">–</div>
+    <div class="legend" id="k-orig-sub">–</div>
+  </div>
+  <div class="card span-3">
+    <h2>Optimal-km nach Trip-Routing</h2>
+    <div class="kpi" id="k-opt">–</div>
+    <div class="legend" id="k-opt-sub">–</div>
+  </div>
+  <div class="card span-3">
+    <h2>Trip-Routing-Einsparung</h2>
+    <div class="kpi" id="k-sav">–</div>
+    <div class="legend" id="k-sav-sub">–</div>
+  </div>
+  <div class="card span-3">
+    <h2>Road Trips analysiert</h2>
+    <div class="kpi" id="k-trips">–</div>
+    <div class="legend" id="k-trips-sub">–</div>
+  </div>
+
+  <div class="card span-8">
+    <h2>Reise-km pro Team — Original vs. Trip-Optimiert</h2>
+    <canvas id="team-bar" height="320"></canvas>
+    <div class="legend">Westküsten-Teams (SEA, SDP, SFG, LAD, OAK) reisen am meisten — geografisch isoliert.
+      Zentrale Teams (CHC, CIN, PIT) am wenigsten. MLBs Trip-Routing ist überall sehr nah am Optimum.</div>
+  </div>
+
+  <div class="card span-4">
+    <h2>Top 5 Zigzag-Trips</h2>
+    <div id="anecdotes"></div>
+    <div class="legend">Hier zahlt MLB Geld — Cross-Country-Routen mit mehreren Richtungswechseln.
+      Die Mets-Story ist Sprint-2-Begründung in Reinform.</div>
+  </div>
+
+  <div class="card span-12">
+    <h2>Pro-Team-Aufschlüsselung</h2>
+    <table id="team-table">
+      <thead><tr>
+        <th>Team</th>
+        <th class="num">Original km</th>
+        <th class="num">Optimal km</th>
+        <th class="num">Einsparung</th>
+        <th class="num">%</th>
+        <th class="num">Road Trips</th>
+        <th class="num">Suboptimal</th>
+        <th class="num">Cross-Country</th>
+        <th class="num">Längster Flug</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Daten: MLB Stats API (statsapi.mlb.com) · Reisemodell: Haversine + Charter-Flugzeit ·
+  Methode: Intra-Trip-TSP (exakt) · Sprint 1 abgeschlossen
+</div>
+
+<script>
+const PAYLOAD = {"teams": [{"id": "BAL", "name": "Baltimore Orioles", "league": "AL", "division": "East", "city": "Baltimore", "state": "MD", "lat": 39.2839, "lon": -76.6217}, {"id": "BOS", "name": "Boston Red Sox", "league": "AL", "division": "East", "city": "Boston", "state": "MA", "lat": 42.3467, "lon": -71.0972}, {"id": "NYY", "name": "New York Yankees", "league": "AL", "division": "East", "city": "Bronx", "state": "NY", "lat": 40.8296, "lon": -73.9262}, {"id": "TBR", "name": "Tampa Bay Rays", "league": "AL", "division": "East", "city": "St. Petersburg", "state": "FL", "lat": 27.7682, "lon": -82.6534}, {"id": "TOR", "name": "Toronto Blue Jays", "league": "AL", "division": "East", "city": "Toronto", "state": "ON", "lat": 43.6414, "lon": -79.3894}, {"id": "CWS", "name": "Chicago White Sox", "league": "AL", "division": "Central", "city": "Chicago", "state": "IL", "lat": 41.83, "lon": -87.6339}, {"id": "CLE", "name": "Cleveland Guardians", "league": "AL", "division": "Central", "city": "Cleveland", "state": "OH", "lat": 41.4962, "lon": -81.6852}, {"id": "DET", "name": "Detroit Tigers", "league": "AL", "division": "Central", "city": "Detroit", "state": "MI", "lat": 42.339, "lon": -83.0485}, {"id": "KCR", "name": "Kansas City Royals", "league": "AL", "division": "Central", "city": "Kansas City", "state": "MO", "lat": 39.0517, "lon": -94.4803}, {"id": "MIN", "name": "Minnesota Twins", "league": "AL", "division": "Central", "city": "Minneapolis", "state": "MN", "lat": 44.9817, "lon": -93.2776}, {"id": "HOU", "name": "Houston Astros", "league": "AL", "division": "West", "city": "Houston", "state": "TX", "lat": 29.757, "lon": -95.3551}, {"id": "LAA", "name": "Los Angeles Angels", "league": "AL", "division": "West", "city": "Anaheim", "state": "CA", "lat": 33.8003, "lon": -117.8827}, {"id": "OAK", "name": "Athletics", "league": "AL", "division": "West", "city": "West Sacramento", "state": "CA", "lat": 38.5806, "lon": -121.5133}, {"id": "SEA", "name": "Seattle Mariners", "league": "AL", "division": "West", "city": "Seattle", "state": "WA", "lat": 47.5914, "lon": -122.3325}, {"id": "TEX", "name": "Texas Rangers", "league": "AL", "division": "West", "city": "Arlington", "state": "TX", "lat": 32.7473, "lon": -97.0838}, {"id": "ATL", "name": "Atlanta Braves", "league": "NL", "division": "East", "city": "Atlanta", "state": "GA", "lat": 33.8908, "lon": -84.4678}, {"id": "MIA", "name": "Miami Marlins", "league": "NL", "division": "East", "city": "Miami", "state": "FL", "lat": 25.7781, "lon": -80.2197}, {"id": "NYM", "name": "New York Mets", "league": "NL", "division": "East", "city": "Queens", "state": "NY", "lat": 40.7571, "lon": -73.8458}, {"id": "PHI", "name": "Philadelphia Phillies", "league": "NL", "division": "East", "city": "Philadelphia", "state": "PA", "lat": 39.9061, "lon": -75.1665}, {"id": "WSN", "name": "Washington Nationals", "league": "NL", "division": "East", "city": "Washington", "state": "DC", "lat": 38.873, "lon": -77.0074}, {"id": "CHC", "name": "Chicago Cubs", "league": "NL", "division": "Central", "city": "Chicago", "state": "IL", "lat": 41.9484, "lon": -87.6553}, {"id": "CIN", "name": "Cincinnati Reds", "league": "NL", "division": "Central", "city": "Cincinnati", "state": "OH", "lat": 39.0975, "lon": -84.5069}, {"id": "MIL", "name": "Milwaukee Brewers", "league": "NL", "division": "Central", "city": "Milwaukee", "state": "WI", "lat": 43.0281, "lon": -87.9712}, {"id": "PIT", "name": "Pittsburgh Pirates", "league": "NL", "division": "Central", "city": "Pittsburgh", "state": "PA", "lat": 40.4469, "lon": -80.0057}, {"id": "STL", "name": "St. Louis Cardinals", "league": "NL", "division": "Central", "city": "St. Louis", "state": "MO", "lat": 38.6226, "lon": -90.1928}, {"id": "ARI", "name": "Arizona Diamondbacks", "league": "NL", "division": "West", "city": "Phoenix", "state": "AZ", "lat": 33.4453, "lon": -112.0667}, {"id": "COL", "name": "Colorado Rockies", "league": "NL", "division": "West", "city": "Denver", "state": "CO", "lat": 39.7559, "lon": -104.9942}, {"id": "LAD", "name": "Los Angeles Dodgers", "league": "NL", "division": "West", "city": "Los Angeles", "state": "CA", "lat": 34.0739, "lon": -118.24}, {"id": "SDP", "name": "San Diego Padres", "league": "NL", "division": "West", "city": "San Diego", "state": "CA", "lat": 32.7073, "lon": -117.1566}, {"id": "SFG", "name": "San Francisco Giants", "league": "NL", "division": "West", "city": "San Francisco", "state": "CA", "lat": 37.7786, "lon": -122.3893}], "seasons": {"2024": {"year": 2024, "total_original_km": 1709835.456267041, "total_optimal_km": 1691714.7585438166, "total_savings_km": 18120.697723224293, "total_savings_pct": 1.0603815327385493, "total_co2_kg": 99663.83747773361, "total_cost_usd": 543620.9316967288, "avg_km_per_team": 56994.515208901365, "median_km": 53585.330652935205, "num_trips": 391, "num_trips_changed": 33, "per_team": [{"team_id": "ARI", "original_km": 67054.52955757084, "optimal_km": 65596.10926465734, "savings_km": 1458.4202929135063, "savings_pct": 2.1749765489911526, "num_trips": 13, "num_changed": 1, "flight_hours": 95.79218508224407, "tz_hops": 44, "cross_country": 5, "longest_trip": 3690.08164213604}, {"team_id": "ATL", "original_km": 52350.218472579094, "optimal_km": 51787.07388208461, "savings_km": 563.1445904944849, "savings_pct": 1.0757253874488768, "num_trips": 13, "num_changed": 2, "flight_hours": 74.78602638939871, "tz_hops": 30, "cross_country": 4, "longest_trip": 3489.9279092609486}, {"team_id": "BAL", "original_km": 52914.82537702958, "optimal_km": 52697.066906677086, "savings_km": 217.7584703524917, "savings_pct": 0.41152638943985087, "num_trips": 13, "num_changed": 1, "flight_hours": 75.59260768147084, "tz_hops": 26, "cross_country": 4, "longest_trip": 3843.1375617760955}, {"team_id": "BOS", "original_km": 57901.63975720116, "optimal_km": 57901.63975720116, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 82.71662822457307, "tz_hops": 22, "cross_country": 3, "longest_trip": 4165.148614540588}, {"team_id": "CHC", "original_km": 45061.91926390403, "optimal_km": 43301.06213402876, "savings_km": 1760.857129875265, "savings_pct": 3.9076389968275613, "num_trips": 13, "num_changed": 2, "flight_hours": 64.37417037700577, "tz_hops": 28, "cross_country": 0, "longest_trip": 2979.7896773257794}, {"team_id": "CIN", "original_km": 45159.06027510884, "optimal_km": 43940.44198841575, "savings_km": 1218.6182866930903, "savings_pct": 2.6985023144176887, "num_trips": 12, "num_changed": 2, "flight_hours": 64.51294325015544, "tz_hops": 34, "cross_country": 4, "longest_trip": 3278.6967728699924}, {"team_id": "CLE", "original_km": 47968.18851695591, "optimal_km": 47899.98826672439, "savings_km": 68.20025023152266, "savings_pct": 0.14217808164136753, "num_trips": 13, "num_changed": 1, "flight_hours": 68.52598359565131, "tz_hops": 30, "cross_country": 2, "longest_trip": 3376.1167046673836}, {"team_id": "COL", "original_km": 54471.2596395306, "optimal_km": 53964.00192252312, "savings_km": 507.2577170074801, "savings_pct": 0.9312391899220115, "num_trips": 13, "num_changed": 1, "flight_hours": 77.81608519932941, "tz_hops": 36, "cross_country": 0, "longest_trip": 2774.32382342817}, {"team_id": "CWS", "original_km": 48566.15997927402, "optimal_km": 48566.15997927402, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 69.38022854182002, "tz_hops": 32, "cross_country": 0, "longest_trip": 2982.213180329108}, {"team_id": "DET", "original_km": 50071.32550104502, "optimal_km": 49825.80831514303, "savings_km": 245.51718590199016, "savings_pct": 0.4903349041496136, "num_trips": 13, "num_changed": 1, "flight_hours": 71.5304650014929, "tz_hops": 34, "cross_country": 5, "longest_trip": 3355.980516935001}, {"team_id": "HOU", "original_km": 61421.10334423547, "optimal_km": 61421.10334423547, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 13, "num_changed": 0, "flight_hours": 87.74443334890782, "tz_hops": 32, "cross_country": 2, "longest_trip": 3040.905006897555}, {"team_id": "KCR", "original_km": 49366.26905301869, "optimal_km": 49121.25507285709, "savings_km": 245.0139801615951, "savings_pct": 0.49631860957216256, "num_trips": 13, "num_changed": 2, "flight_hours": 70.5232415043124, "tz_hops": 32, "cross_country": 0, "longest_trip": 2428.2362491032472}, {"team_id": "LAA", "original_km": 72811.6541651085, "optimal_km": 71972.98735187364, "savings_km": 838.6668132348568, "savings_pct": 1.1518304629271114, "num_trips": 13, "num_changed": 2, "flight_hours": 104.01664880729786, "tz_hops": 48, "cross_country": 9, "longest_trip": 4149.7159588991935}, {"team_id": "LAD", "original_km": 71265.56712809451, "optimal_km": 71013.11712380064, "savings_km": 252.45000429387437, "savings_pct": 0.3542383993662947, "num_trips": 14, "num_changed": 2, "flight_hours": 101.80795304013506, "tz_hops": 52, "cross_country": 10, "longest_trip": 3947.5993928991434}, {"team_id": "MIA", "original_km": 68079.59147245009, "optimal_km": 66714.29458045734, "savings_km": 1365.2968919927516, "savings_pct": 2.00544225143485, "num_trips": 13, "num_changed": 1, "flight_hours": 97.25655924635727, "tz_hops": 30, "cross_country": 5, "longest_trip": 4163.8493580362165}, {"team_id": "MIL", "original_km": 47408.09339307003, "optimal_km": 47408.09339307003, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 67.72584770438576, "tz_hops": 32, "cross_country": 0, "longest_trip": 2950.6425602301942}, {"team_id": "MIN", "original_km": 53526.516505238535, "optimal_km": 52342.28665295706, "savings_km": 1184.2298522814745, "savings_pct": 2.2124171898344547, "num_trips": 13, "num_changed": 2, "flight_hours": 76.4664521503408, "tz_hops": 32, "cross_country": 0, "longest_trip": 2982.213180329108}, {"team_id": "NYM", "original_km": 57377.75298533741, "optimal_km": 52508.29665878752, "savings_km": 4869.456326549887, "savings_pct": 8.530246458269898, "num_trips": 12, "num_changed": 3, "flight_hours": 81.96821855048199, "tz_hops": 28, "cross_country": 5, "longest_trip": 4138.682876535547}, {"team_id": "NYY", "original_km": 51572.85952144205, "optimal_km": 51572.85952144205, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 13, "num_changed": 0, "flight_hours": 73.6755136020601, "tz_hops": 26, "cross_country": 5, "longest_trip": 4130.430480388067}, {"team_id": "OAK", "original_km": 72301.09696237082, "optimal_km": 71941.82723116528, "savings_km": 359.26973120553885, "savings_pct": 0.4969077182778031, "num_trips": 12, "num_changed": 1, "flight_hours": 103.28728137481546, "tz_hops": 50, "cross_country": 11, "longest_trip": 4223.116993697514}, {"team_id": "PHI", "original_km": 51302.139486607826, "optimal_km": 51302.139486607826, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 13, "num_changed": 0, "flight_hours": 73.28877069515401, "tz_hops": 28, "cross_country": 5, "longest_trip": 4048.7321656112}, {"team_id": "PIT", "original_km": 43023.66881658705, "optimal_km": 43023.66881658705, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 61.462384023695776, "tz_hops": 30, "cross_country": 4, "longest_trip": 3633.65488215844}, {"team_id": "SDP", "original_km": 74276.29650714839, "optimal_km": 74245.73357006184, "savings_km": 30.562937086549937, "savings_pct": 0.04135053028026806, "num_trips": 14, "num_changed": 1, "flight_hours": 106.10899501021197, "tz_hops": 54, "cross_country": 10, "longest_trip": 4147.010972866204}, {"team_id": "SEA", "original_km": 76141.54722586472, "optimal_km": 75224.76091632087, "savings_km": 916.7863095438515, "savings_pct": 1.2040552667314672, "num_trips": 11, "num_changed": 2, "flight_hours": 108.77363889409249, "tz_hops": 50, "cross_country": 10, "longest_trip": 4064.8718882513417}, {"team_id": "SFG", "original_km": 73659.70066932493, "optimal_km": 73659.70066932493, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 13, "num_changed": 0, "flight_hours": 105.22814381332132, "tz_hops": 50, "cross_country": 10, "longest_trip": 4328.268782040173}, {"team_id": "STL", "original_km": 48143.54254600371, "optimal_km": 48143.54254600371, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 68.77648935143387, "tz_hops": 32, "cross_country": 0, "longest_trip": 2800.498473414635}, {"team_id": "TBR", "original_km": 56240.14378922727, "optimal_km": 55371.92152704406, "savings_km": 868.2222621832116, "savings_pct": 1.5437767467968644, "num_trips": 12, "num_changed": 1, "flight_hours": 80.34306255603896, "tz_hops": 20, "cross_country": 3, "longest_trip": 4064.8718882513417}, {"team_id": "TEX", "original_km": 59761.65473657571, "optimal_km": 59370.9532575287, "savings_km": 390.7014790470057, "savings_pct": 0.653766166230143, "num_trips": 13, "num_changed": 2, "flight_hours": 85.3737924808224, "tz_hops": 36, "cross_country": 0, "longest_trip": 2685.9950637153984}, {"team_id": "TOR", "original_km": 53644.144800631875, "optimal_km": 53312.20126552549, "savings_km": 331.94353510638757, "savings_pct": 0.6187880081601702, "num_trips": 13, "num_changed": 1, "flight_hours": 76.63449257233125, "tz_hops": 32, "cross_country": 5, "longest_trip": 3535.010768180152}, {"team_id": "WSN", "original_km": 46992.98681850461, "optimal_km": 46564.66314143746, "savings_km": 428.32367706715013, "savings_pct": 0.9114629779150097, "num_trips": 13, "num_changed": 2, "flight_hours": 67.13283831214946, "tz_hops": 24, "cross_country": 4, "longest_trip": 3919.224971075166}], "top_trips": [{"team_id": "NYM", "cities_original": ["LAA", "STL", "COL", "SEA"], "cities_optimal": ["STL", "COL", "LAA", "SEA"], "km_original": 13255.67362344788, "km_optimal": 9473.58973128284, "savings_km": 3782.0838921650393, "savings_pct": 28.531812110060816, "nights": 9}, {"team_id": "ARI", "cities_original": ["SFG", "STL", "SEA"], "cities_optimal": ["SFG", "SEA", "STL"], "km_original": 8411.641457177948, "km_optimal": 6953.221164264432, "savings_km": 1458.4202929135154, "savings_pct": 17.338117659175715, "nights": 10}, {"team_id": "MIA", "cities_original": ["MIL", "TBR", "ATL"], "cities_optimal": ["MIL", "ATL", "TBR"], "km_original": 5499.2999105349145, "km_optimal": 4134.003018542174, "savings_km": 1365.2968919927407, "savings_pct": 24.82674002516693, "nights": 9}, {"team_id": "CHC", "cities_original": ["SDP", "SEA", "ARI"], "cities_optimal": ["SEA", "SDP", "ARI"], "km_original": 8626.636609922214, "km_optimal": 7312.426592077205, "savings_km": 1314.2100178450091, "savings_pct": 15.234326856117095, "nights": 9}, {"team_id": "MIN", "cities_original": ["OAK", "ARI", "SEA"], "cities_optimal": ["ARI", "OAK", "SEA"], "km_original": 7486.569136465668, "km_optimal": 6321.682418024926, "savings_km": 1164.8867184407418, "savings_pct": 15.55968691675868, "nights": 9}, {"team_id": "NYM", "cities_original": ["ATL", "MIL", "ATL"], "cities_optimal": ["ATL", "ATL", "MIL"], "km_original": 4538.76944342875, "km_optimal": 3463.9991399254586, "savings_km": 1074.770303503291, "savings_pct": 23.679773050806716, "nights": 6}, {"team_id": "CIN", "cities_original": ["SFG", "ARI", "LAD"], "cities_optimal": ["SFG", "LAD", "ARI"], "km_original": 7948.086041458062, "km_optimal": 6948.180902127313, "savings_km": 999.9051393307491, "savings_pct": 12.580451873761023, "nights": 9}, {"team_id": "TBR", "cities_original": ["OAK", "LAD", "SEA"], "cities_optimal": ["LAD", "OAK", "SEA"], "km_original": 9966.03440616718, "km_optimal": 9097.812143983967, "savings_km": 868.2222621832134, "savings_pct": 8.711812811382028, "nights": 9}, {"team_id": "LAA", "cities_original": ["BOS", "TBR", "CIN"], "cities_optimal": ["TBR", "BOS", "CIN"], "km_original": 10374.44692362101, "km_optimal": 9552.669215174152, "savings_km": 821.777708446858, "savings_pct": 7.9211712633643865, "nights": 9}, {"team_id": "SEA", "cities_original": ["LAA", "OAK", "STL"], "cities_optimal": ["OAK", "LAA", "STL"], "km_original": 7678.647183193874, "km_optimal": 6927.676347216086, "savings_km": 750.9708359777887, "savings_pct": 9.779988819142856, "nights": 9}, {"team_id": "COL", "cities_original": ["ATL", "MIL", "DET"], "cities_optimal": ["ATL", "DET", "MIL"], "km_original": 5262.010911655746, "km_optimal": 4754.753194648265, "savings_km": 507.257717007481, "savings_pct": 9.639997436794884, "nights": 9}, {"team_id": "ATL", "cities_original": ["NYY", "STL", "STL", "CWS"], "cities_optimal": ["NYY", "CWS", "STL", "STL"], "km_original": 3961.4537760765857, "km_optimal": 3509.150316442726, "savings_km": 452.3034596338598, "savings_pct": 11.417612957277013, "nights": 6}, {"team_id": "CHC", "cities_original": ["MIA", "PIT", "WSN"], "cities_optimal": ["MIA", "WSN", "PIT"], "km_original": 4827.894150201319, "km_optimal": 4381.247038171062, "savings_km": 446.6471120302567, "savings_pct": 9.251385762292074, "nights": 9}, {"team_id": "OAK", "cities_original": ["SEA", "HOU", "KCR"], "cities_optimal": ["SEA", "KCR", "HOU"], "km_original": 7415.700639171515, "km_optimal": 7056.430907965977, "savings_km": 359.26973120553794, "savings_pct": 4.844717292224403, "nights": 9}, {"team_id": "TOR", "cities_original": ["TBR", "HOU", "NYY"], "cities_optimal": ["HOU", "TBR", "NYY"], "km_original": 5885.777182183179, "km_optimal": 5553.83364707679, "savings_km": 331.9435351063894, "savings_pct": 5.639757075942575, "nights": 10}], "zigzags": [{"team_id": "NYM", "cities": ["LAA", "STL", "COL", "SEA"], "direction_changes": 3, "wasted_km": 3782.0838921650393}, {"team_id": "MIA", "cities": ["MIL", "TBR", "ATL"], "direction_changes": 3, "wasted_km": 1365.2968919927416}, {"team_id": "MIN", "cities": ["OAK", "ARI", "SEA"], "direction_changes": 3, "wasted_km": 1164.8867184407418}, {"team_id": "CIN", "cities": ["SFG", "ARI", "LAD"], "direction_changes": 3, "wasted_km": 999.9051393307491}, {"team_id": "TBR", "cities": ["OAK", "LAD", "SEA"], "direction_changes": 3, "wasted_km": 868.2222621832134}, {"team_id": "SEA", "cities": ["LAA", "OAK", "STL"], "direction_changes": 3, "wasted_km": 750.9708359777887}, {"team_id": "ARI", "cities": ["SFG", "STL", "SEA"], "direction_changes": 3, "wasted_km": 683.4448276634721}, {"team_id": "WSN", "cities": ["BOS", "CWS", "PHI"], "direction_changes": 3, "wasted_km": 306.1901362025942}, {"team_id": "CIN", "cities": ["WSN", "ATL", "ATL", "TBR"], "direction_changes": 3, "wasted_km": 218.7131473623408}, {"team_id": "BAL", "cities": ["CLE", "TOR", "TBR"], "direction_changes": 3, "wasted_km": 217.75847035248898}, {"team_id": "TEX", "cities": ["KCR", "OAK", "COL"], "direction_changes": 2, "wasted_km": 188.24987062661785}, {"team_id": "ATL", "cities": ["BOS", "WSN", "BAL"], "direction_changes": 3, "wasted_km": 108.89602472305614}, {"team_id": "MIN", "cities": ["HOU", "NYY", "PIT"], "direction_changes": 2, "wasted_km": 19.343133840732662}, {"team_id": "TBR", "cities": ["ATL", "MIN", "PIT"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "TOR", "cities": ["TBR", "HOU", "NYY"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "CLE", "cities": ["MIA", "CIN", "TOR"], "direction_changes": 3, "wasted_km": 0.0}, {"team_id": "DET", "cities": ["CWS", "CWS", "NYM", "NYM"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "KCR", "cities": ["COL", "STL", "BOS"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "MIN", "cities": ["KCR", "KCR", "MIL"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "MIN", "cities": ["CWS", "CWS", "SFG"], "direction_changes": 2, "wasted_km": 0.0}]}, "2025": {"year": 2025, "total_original_km": 1715743.105451901, "total_optimal_km": 1700099.0968158385, "total_savings_km": 15644.0086360625, "total_savings_pct": 0.9117920151538129, "total_co2_kg": 86042.04749834375, "total_cost_usd": 469320.259081875, "avg_km_per_team": 57191.4368483967, "median_km": 56001.551741710995, "num_trips": 394, "num_trips_changed": 30, "per_team": [{"team_id": "ARI", "original_km": 67724.40486181856, "optimal_km": 64857.85305620125, "savings_km": 2866.5518056173096, "savings_pct": 4.232671828517468, "num_trips": 13, "num_changed": 1, "flight_hours": 96.74914980259796, "tz_hops": 48, "cross_country": 7, "longest_trip": 3456.823374704508}, {"team_id": "ATL", "original_km": 53559.40396643201, "optimal_km": 53559.40396643201, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 13, "num_changed": 0, "flight_hours": 76.51343423776002, "tz_hops": 26, "cross_country": 4, "longest_trip": 3422.2419228230697}, {"team_id": "BAL", "original_km": 57428.738817762896, "optimal_km": 57428.738817762896, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 82.041055453947, "tz_hops": 32, "cross_country": 6, "longest_trip": 3941.6939842847214}, {"team_id": "BOS", "original_km": 61272.65198564727, "optimal_km": 61272.65198564727, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 87.53235997949612, "tz_hops": 30, "cross_country": 5, "longest_trip": 4223.116993697514}, {"team_id": "CHC", "original_km": 41695.32256157355, "optimal_km": 40556.687125448254, "savings_km": 1138.635436125296, "savings_pct": 2.7308469299975235, "num_trips": 13, "num_changed": 2, "flight_hours": 59.56474651653365, "tz_hops": 28, "cross_country": 0, "longest_trip": 2878.1960012400873}, {"team_id": "CIN", "original_km": 42321.24952544037, "optimal_km": 41284.65324306467, "savings_km": 1036.5962823757, "savings_pct": 2.4493517889933174, "num_trips": 13, "num_changed": 2, "flight_hours": 60.45892789348626, "tz_hops": 34, "cross_country": 4, "longest_trip": 3278.6967728699924}, {"team_id": "CLE", "original_km": 42134.231402151294, "optimal_km": 42134.231402151294, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 13, "num_changed": 0, "flight_hours": 60.191759145930426, "tz_hops": 28, "cross_country": 3, "longest_trip": 3376.1167046673836}, {"team_id": "COL", "original_km": 60317.88995599982, "optimal_km": 60317.88995599982, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 86.16841422285685, "tz_hops": 40, "cross_country": 0, "longest_trip": 2838.073390239294}, {"team_id": "CWS", "original_km": 43054.712204394076, "optimal_km": 43054.712204394076, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 61.50673172056296, "tz_hops": 32, "cross_country": 0, "longest_trip": 2880.893071223636}, {"team_id": "DET", "original_km": 46709.76103343067, "optimal_km": 46709.76103343067, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 66.7282300477581, "tz_hops": 28, "cross_country": 3, "longest_trip": 3253.00376088918}, {"team_id": "HOU", "original_km": 61332.56996285299, "optimal_km": 58825.53543895588, "savings_km": 2507.034523897113, "savings_pct": 4.087607164375367, "num_trips": 13, "num_changed": 1, "flight_hours": 87.61795708979, "tz_hops": 30, "cross_country": 2, "longest_trip": 3040.905006897555}, {"team_id": "KCR", "original_km": 49047.878550336325, "optimal_km": 49000.99117465542, "savings_km": 46.88737568090437, "savings_pct": 0.09559511454258983, "num_trips": 13, "num_changed": 1, "flight_hours": 70.06839792905188, "tz_hops": 28, "cross_country": 0, "longest_trip": 2541.487866940848}, {"team_id": "LAA", "original_km": 72496.42950449997, "optimal_km": 72313.96135146804, "savings_km": 182.4681530319358, "savings_pct": 0.25169260648982683, "num_trips": 12, "num_changed": 2, "flight_hours": 103.56632786357137, "tz_hops": 52, "cross_country": 11, "longest_trip": 4149.7159588991935}, {"team_id": "LAD", "original_km": 71045.04184372512, "optimal_km": 70581.97974581635, "savings_km": 463.0620979087689, "savings_pct": 0.6517866495558522, "num_trips": 13, "num_changed": 1, "flight_hours": 101.49291691960731, "tz_hops": 50, "cross_country": 10, "longest_trip": 4165.148614540588}, {"team_id": "MIA", "original_km": 64208.582022943265, "optimal_km": 63664.82525109127, "savings_km": 543.7567718519931, "savings_pct": 0.8468599597133225, "num_trips": 12, "num_changed": 1, "flight_hours": 91.72654574706183, "tz_hops": 26, "cross_country": 6, "longest_trip": 4392.337600739937}, {"team_id": "MIL", "original_km": 49471.19079370237, "optimal_km": 49471.19079370237, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 70.67312970528911, "tz_hops": 32, "cross_country": 0, "longest_trip": 2950.6425602301942}, {"team_id": "MIN", "original_km": 54574.36466565909, "optimal_km": 54093.904308956415, "savings_km": 480.46035670267884, "savings_pct": 0.8803773706687026, "num_trips": 14, "num_changed": 1, "flight_hours": 77.96337809379871, "tz_hops": 32, "cross_country": 1, "longest_trip": 4064.8718882513417}, {"team_id": "NYM", "original_km": 57455.07676677058, "optimal_km": 57455.07676677058, "savings_km": 0.0, "savings_pct": 0.0, "num_trips": 14, "num_changed": 0, "flight_hours": 82.07868109538657, "tz_hops": 30, "cross_country": 5, "longest_trip": 4138.682876535547}, {"team_id": "NYY", "original_km": 51915.272891666886, "optimal_km": 51908.97911782929, "savings_km": 6.293773837598565, "savings_pct": 0.012123164315695621, "num_trips": 13, "num_changed": 1, "flight_hours": 74.16467555952416, "tz_hops": 22, "cross_country": 3, "longest_trip": 4028.3122856495097}, {"team_id": "OAK", "original_km": 78779.99090481404, "optimal_km": 78605.63974627072, "savings_km": 174.35115854331525, "savings_pct": 0.22131401202365586, "num_trips": 13, "num_changed": 1, "flight_hours": 112.54284414973436, "tz_hops": 54, "cross_country": 9, "longest_trip": 4223.116993697514}, {"team_id": "PHI", "original_km": 54444.10187192992, "optimal_km": 54419.233567149626, "savings_km": 24.86830478029151, "savings_pct": 0.04567676557286183, "num_trips": 14, "num_changed": 1, "flight_hours": 77.77728838847132, "tz_hops": 30, "cross_country": 5, "longest_trip": 4048.7321656112}, {"team_id": "PIT", "original_km": 45941.99524763375, "optimal_km": 45327.74417280698, "savings_km": 614.2510748267669, "savings_pct": 1.3370143623842807, "num_trips": 14, "num_changed": 1, "flight_hours": 65.63142178233393, "tz_hops": 34, "cross_country": 5, "longest_trip": 3633.65488215844}, {"team_id": "SDP", "original_km": 73125.93563436896, "optimal_km": 72553.33451253666, "savings_km": 572.6011218322965, "savings_pct": 0.7830342502492041, "num_trips": 13, "num_changed": 1, "flight_hours": 104.4656223348128, "tz_hops": 54, "cross_country": 8, "longest_trip": 3920.6049108078123}, {"team_id": "SEA", "original_km": 71513.8825465204, "optimal_km": 69631.83443027792, "savings_km": 1882.048116242484, "savings_pct": 2.631724148130533, "num_trips": 11, "num_changed": 5, "flight_hours": 102.16268935217198, "tz_hops": 42, "cross_country": 10, "longest_trip": 3998.2583138457535}, {"team_id": "SFG", "original_km": 74854.66049902987, "optimal_km": 73843.81298511491, "savings_km": 1010.8475139149523, "savings_pct": 1.3504135977319054, "num_trips": 12, "num_changed": 2, "flight_hours": 106.93522928432833, "tz_hops": 50, "cross_country": 9, "longest_trip": 4163.8493580362165}, {"team_id": "STL", "original_km": 44388.27322727438, "optimal_km": 44330.35998536087, "savings_km": 57.91324191351305, "savings_pct": 0.13046968873285264, "num_trips": 13, "num_changed": 1, "flight_hours": 63.41181889610626, "tz_hops": 30, "cross_country": 0, "longest_trip": 2979.7896773257794}, {"team_id": "TBR", "original_km": 58174.5397563558, "optimal_km": 57415.622174501266, "savings_km": 758.9175818545336, "savings_pct": 1.304552790676129, "num_trips": 13, "num_changed": 1, "flight_hours": 83.10648536622259, "tz_hops": 22, "cross_country": 3, "longest_trip": 3846.3748820645346}, {"team_id": "TEX", "original_km": 61586.21992731065, "optimal_km": 61568.380267430475, "savings_km": 17.83965988017735, "savings_pct": 0.02896696680074414, "num_trips": 13, "num_changed": 1, "flight_hours": 87.98031418187236, "tz_hops": 36, "cross_country": 0, "longest_trip": 2783.6635256112163}, {"team_id": "TOR", "original_km": 52621.75969537953, "optimal_km": 52464.692718268154, "savings_km": 157.0669771113753, "savings_pct": 0.2984829432170559, "num_trips": 12, "num_changed": 1, "flight_hours": 75.17394242197075, "tz_hops": 26, "cross_country": 4, "longest_trip": 3535.010768180152}, {"team_id": "WSN", "original_km": 52546.97282447665, "optimal_km": 51445.41551634314, "savings_km": 1101.5573081335097, "savings_pct": 2.096328768191949, "num_trips": 13, "num_changed": 2, "flight_hours": 75.06710403496666, "tz_hops": 28, "cross_country": 5, "longest_trip": 3919.224971075166}], "top_trips": [{"team_id": "ARI", "cities_original": ["TOR", "COL", "CWS"], "cities_optimal": ["COL", "TOR", "CWS"], "km_original": 9006.62991488977, "km_optimal": 6140.078109272463, "savings_km": 2866.5518056173078, "savings_pct": 31.827129933231973, "nights": 8}, {"team_id": "HOU", "cities_original": ["BOS", "MIA", "NYY"], "cities_optimal": ["MIA", "BOS", "NYY"], "km_original": 8662.66013650135, "km_optimal": 6155.625612604234, "savings_km": 2507.034523897116, "savings_pct": 28.940700482215263, "nights": 9}, {"team_id": "CHC", "cities_original": ["WSN", "DET", "PHI"], "cities_optimal": ["WSN", "PHI", "DET"], "km_original": 3387.915437410328, "km_optimal": 2254.2466013224953, "savings_km": 1133.668836087833, "savings_pct": 33.46213496268349, "nights": 8}, {"team_id": "CIN", "cities_original": ["LAA", "ARI", "LAD"], "cities_optimal": ["ARI", "LAA", "LAD"], "km_original": 7185.067788830575, "km_optimal": 6168.558509202741, "savings_km": 1016.5092796278341, "savings_pct": 14.147525249629952, "nights": 9}, {"team_id": "WSN", "cities_original": ["MIA", "PIT", "COL"], "cities_optimal": ["MIA", "COL", "PIT"], "km_original": 7637.503510764323, "km_optimal": 6691.344770632289, "savings_km": 946.1587401320348, "savings_pct": 12.388324781762988, "nights": 9}, {"team_id": "SEA", "cities_original": ["SDP", "CWS", "HOU"], "cities_optimal": ["SDP", "HOU", "CWS"], "km_original": 9048.47410561316, "km_optimal": 8107.9124615946475, "savings_km": 940.5616440185131, "savings_pct": 10.394698962944945, "nights": 9}, {"team_id": "SFG", "cities_original": ["WSN", "DET", "MIA"], "cities_optimal": ["DET", "WSN", "MIA"], "km_original": 10581.561411275132, "km_optimal": 9645.530534283596, "savings_km": 936.0308769915355, "savings_pct": 8.845867264864637, "nights": 9}, {"team_id": "TBR", "cities_original": ["LAA", "SEA", "OAK", "SFG"], "cities_optimal": ["LAA", "SFG", "OAK", "SEA"], "km_original": 9960.464042827043, "km_optimal": 9201.546460972517, "savings_km": 758.9175818545264, "savings_pct": 7.6192994482125105, "nights": 13}, {"team_id": "SEA", "cities_original": ["CHC", "MIN", "TEX"], "cities_optimal": ["MIN", "CHC", "TEX"], "km_original": 7434.112747880668, "km_optimal": 6807.040156049072, "savings_km": 627.0725918315966, "savings_pct": 8.435069699613631, "nights": 9}, {"team_id": "PIT", "cities_original": ["SEA", "KCR", "MIN"], "cities_optimal": ["KCR", "SEA", "MIN"], "km_original": 7720.15881285148, "km_optimal": 7105.9077380247045, "savings_km": 614.251074826776, "savings_pct": 7.956456463100908, "nights": 9}, {"team_id": "SDP", "cities_original": ["WSN", "MIA", "STL"], "cities_optimal": ["MIA", "WSN", "STL"], "km_original": 9361.665944055723, "km_optimal": 8789.064822223423, "savings_km": 572.6011218323001, "savings_pct": 6.116444714584999, "nights": 9}, {"team_id": "MIA", "cities_original": ["COL", "TEX", "PHI"], "cities_optimal": ["TEX", "COL", "PHI"], "km_original": 7578.411180781073, "km_optimal": 7034.654408929084, "savings_km": 543.7567718519895, "savings_pct": 7.175076132461143, "nights": 9}, {"team_id": "MIN", "cities_original": ["TBR", "SEA", "OAK"], "cities_optimal": ["TBR", "OAK", "SEA"], "km_original": 9634.836412678349, "km_optimal": 9154.376055975667, "savings_km": 480.4603567026825, "savings_pct": 4.986699681485524, "nights": 10}, {"team_id": "LAD", "cities_original": ["BOS", "CIN", "TBR"], "cities_optimal": ["CIN", "BOS", "TBR"], "km_original": 10069.706991891548, "km_optimal": 9606.644893982775, "savings_km": 463.06209790877256, "savings_pct": 4.598565760469943, "nights": 9}, {"team_id": "OAK", "cities_original": ["CLE", "TEX", "HOU"], "cities_optimal": ["CLE", "HOU", "TEX"], "km_original": 8006.669321654282, "km_optimal": 7832.318163110987, "savings_km": 174.35115854329433, "savings_pct": 2.1775741140171267, "nights": 9}], "zigzags": [{"team_id": "ARI", "cities": ["TOR", "COL", "CWS"], "direction_changes": 3, "wasted_km": 2848.609098929266}, {"team_id": "HOU", "cities": ["BOS", "MIA", "NYY"], "direction_changes": 3, "wasted_km": 2472.513735166508}, {"team_id": "CHC", "cities": ["WSN", "DET", "PHI"], "direction_changes": 3, "wasted_km": 1098.7540674757315}, {"team_id": "CIN", "cities": ["LAA", "ARI", "LAD"], "direction_changes": 3, "wasted_km": 1016.5092796278341}, {"team_id": "WSN", "cities": ["MIA", "PIT", "COL"], "direction_changes": 3, "wasted_km": 521.4543225567759}, {"team_id": "MIN", "cities": ["TBR", "SEA", "OAK"], "direction_changes": 2, "wasted_km": 480.4603567026825}, {"team_id": "OAK", "cities": ["CLE", "TEX", "HOU"], "direction_changes": 3, "wasted_km": 174.35115854329433}, {"team_id": "WSN", "cities": ["LAD", "SDP", "LAA"], "direction_changes": 3, "wasted_km": 155.39856800148118}, {"team_id": "TEX", "cities": ["SDP", "LAA", "HOU"], "direction_changes": 2, "wasted_km": 17.83965988017917}, {"team_id": "TOR", "cities": ["HOU", "NYY", "NYY"], "direction_changes": 2, "wasted_km": 9.094947017729282e-13}, {"team_id": "NYY", "cities": ["BOS", "MIN", "BAL"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "TBR", "cities": ["MIN", "DET", "BOS"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "TBR", "cities": ["LAA", "SEA", "OAK", "SFG"], "direction_changes": 3, "wasted_km": 0.0}, {"team_id": "TOR", "cities": ["MIN", "STL", "PHI"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "CWS", "cities": ["BOS", "MIN", "OAK"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "HOU", "cities": ["MIN", "MIN", "SEA"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "HOU", "cities": ["TEX", "TOR", "ATL"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "LAA", "cities": ["SDP", "LAD", "OAK"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "LAA", "cities": ["SEA", "MIL", "COL"], "direction_changes": 2, "wasted_km": 0.0}, {"team_id": "ATL", "cities": ["MIA", "PHI", "CHC"], "direction_changes": 2, "wasted_km": 0.0}]}}};
+let currentYear = 2024;
+let teamBarChart = null;
+
+function fmt(n, dig=0) { return Math.round(n).toLocaleString('de-DE'); }
+function fmtPct(n) { return (n>=0?'+':'') + n.toFixed(2) + ' %'; }
+
+function render() {
+  const s = PAYLOAD.seasons[currentYear];
+  document.getElementById('k-orig').textContent = fmt(s.total_original_km) + ' km';
+  document.getElementById('k-orig-sub').textContent =
+    `Ø ${fmt(s.avg_km_per_team)} km/Team · Median ${fmt(s.median_km)} km`;
+  document.getElementById('k-opt').textContent = fmt(s.total_optimal_km) + ' km';
+  document.getElementById('k-opt-sub').textContent = 'Nach TSP-optimaler Trip-Routenführung';
+  document.getElementById('k-sav').innerHTML =
+    fmt(s.total_savings_km) + ' km <span class="delta">' + (s.total_savings_pct).toFixed(2) + ' %</span>';
+  document.getElementById('k-sav-sub').textContent =
+    `≈ ${fmt(s.total_co2_kg/1000)} t CO₂ · $${(s.total_cost_usd/1e6).toFixed(2)} M`;
+  document.getElementById('k-trips').innerHTML =
+    s.num_trips + ' <span class="delta" style="color:var(--muted)">' + s.num_trips_changed + ' suboptimal</span>';
+  document.getElementById('k-trips-sub').textContent =
+    `${(100 - s.num_trips_changed/s.num_trips*100).toFixed(0)} % bereits TSP-optimal`;
+
+  renderTeamBar(s);
+  renderAnecdotes(s);
+  renderTable(s);
+}
+
+function renderTeamBar(s) {
+  const sorted = [...s.per_team].sort((a,b) => b.original_km - a.original_km);
+  const labels = sorted.map(t => t.team_id);
+  const orig = sorted.map(t => t.original_km);
+  const opt = sorted.map(t => t.optimal_km);
+  if (teamBarChart) teamBarChart.destroy();
+  teamBarChart = new Chart(document.getElementById('team-bar'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Original', data: orig, backgroundColor: '#4fc3f7' },
+        { label: 'Optimal (Trip-Routing)', data: opt, backgroundColor: '#ffb74d' },
+      ],
+    },
+    options: {
+      scales: {
+        x: { ticks: { color: '#8a96b3', font: { size: 10 } }, grid: { color: '#1a2440' } },
+        y: { ticks: { color: '#8a96b3', callback: v => fmt(v/1000) + 'k' }, grid: { color: '#233055' } },
+      },
+      plugins: { legend: { labels: { color: '#e8ecf6' } } },
+    },
+  });
+}
+
+function renderAnecdotes(s) {
+  const el = document.getElementById('anecdotes');
+  el.innerHTML = '';
+  s.top_trips.slice(0, 5).forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'anecdote';
+    div.innerHTML = `
+      <div class="head">${t.team_id} · ${t.nights} Nächte</div>
+      <div class="route">Original:  ${t.cities_original.join(' → ')}</div>
+      <div class="route">Optimal:   ${t.cities_optimal.join(' → ')}</div>
+      <div class="savings">−${fmt(t.savings_km)} km (${t.savings_pct.toFixed(1)} %)</div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function renderTable(s) {
+  const tb = document.querySelector('#team-table tbody');
+  tb.innerHTML = '';
+  const sorted = [...s.per_team].sort((a,b) => b.original_km - a.original_km);
+  sorted.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="team">${t.team_id}</td>
+      <td class="num">${fmt(t.original_km)}</td>
+      <td class="num">${fmt(t.optimal_km)}</td>
+      <td class="num">${fmt(t.savings_km)}</td>
+      <td class="num">${t.savings_pct.toFixed(2)} %</td>
+      <td class="num">${t.num_trips}</td>
+      <td class="num">${t.num_changed}</td>
+      <td class="num">${t.cross_country}</td>
+      <td class="num">${fmt(t.longest_trip)}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+document.querySelectorAll('.pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    currentYear = parseInt(p.dataset.year);
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

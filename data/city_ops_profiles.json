@@ -1,0 +1,899 @@
+{
+ "_source": "Scheduler-Ops-Profil: Stau-/Routing-Parameter (Metro-Verkehrslage), regionale Klimatologie (verifizierbar), Principal Level-I Trauma Center (öffentl. Record). Game-Day-Details (On-Call-Routing, aktuelle Lage) mit lokalem EMS/Security-Liaison bestätigen.",
+ "_note": "Konsumiert von src/ops_security.py + src/ops_routing.py (Congestion/Detour). Severity 1(niedrig)–5(kritisch).",
+ "profiles": {
+  "BAL": {
+   "city": "Baltimore",
+   "stadium": "Oriole Park at Camden Yards",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "R Adams Cowley Shock Trauma, Univ. of Maryland (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "BOS": {
+   "city": "Boston",
+   "stadium": "Fenway Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "Massachusetts General Hospital (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "NYY": {
+   "city": "Bronx",
+   "stadium": "Yankee Stadium",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "NewYork-Presbyterian / Weill Cornell (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "TBR": {
+   "city": "St. Petersburg",
+   "stadium": "Tropicana Field",
+   "timezone": "America/New_York",
+   "roof": "dome",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Hurrikan-Saison",
+     "months": "Jun–Nov",
+     "severity": 4,
+     "note": "Atlantik/Golf: Evakuierungs-/Makeup-Risiko; Storm-Tracking nötig (vgl. Milton-E2E)."
+    },
+    {
+     "hazard": "Tägliche Nachmittagsgewitter",
+     "months": "Jun–Sep",
+     "severity": 3,
+     "note": "Florida-Konvektion: häufige Blitz-Unterbrechungen."
+    },
+    {
+     "hazard": "Hitze/Schwüle",
+     "months": "Jun–Sep",
+     "severity": 3,
+     "note": "Hohe Hitzeindizes; Hydration/Heat-Protokoll."
+    }
+   ],
+   "trauma_center": {
+    "name": "Tampa General Hospital (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "TOR": {
+   "city": "Toronto",
+   "stadium": "Rogers Centre",
+   "timezone": "America/Toronto",
+   "roof": "retractable",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "St. Michael's Hospital (Level I, Trauma)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "CWS": {
+   "city": "Chicago",
+   "stadium": "Rate Field",
+   "timezone": "America/Chicago",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "University of Chicago Medicine (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "CLE": {
+   "city": "Cleveland",
+   "stadium": "Progressive Field",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "MetroHealth Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "DET": {
+   "city": "Detroit",
+   "stadium": "Comerica Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "Detroit Receiving Hospital (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "KCR": {
+   "city": "Kansas City",
+   "stadium": "Kauffman Stadium",
+   "timezone": "America/Chicago",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    },
+    {
+     "hazard": "Sommerhitze",
+     "months": "Jul–Aug",
+     "severity": 3,
+     "note": "Anhaltende Hitzewellen in der Mitte des Kontinents."
+    }
+   ],
+   "trauma_center": {
+    "name": "University Health Truman Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "MIN": {
+   "city": "Minneapolis",
+   "stadium": "Target Field",
+   "timezone": "America/Chicago",
+   "roof": "open",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "Hennepin County Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "HOU": {
+   "city": "Houston",
+   "stadium": "Daikin Park",
+   "timezone": "America/Chicago",
+   "roof": "retractable",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Extreme Sommerhitze",
+     "months": "Jun–Sep",
+     "severity": 4,
+     "note": "Hitzeindex regelmäßig >40°C; Heat-Protokoll, Dach/Klimatisierung prüfen."
+    },
+    {
+     "hazard": "Schwere Frühjahrsstürme/Tornados",
+     "months": "Apr–Jun",
+     "severity": 3,
+     "note": "Tornado-Alley-Nähe: Warnketten, Schutzräume."
+    },
+    {
+     "hazard": "Hurrikan-Risiko (Golf)",
+     "months": "Jun–Nov",
+     "severity": 3,
+     "note": "Houston Golfküste: Sturm-/Überflutungsrisiko."
+    }
+   ],
+   "trauma_center": {
+    "name": "Memorial Hermann–Texas Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "LAA": {
+   "city": "Anaheim",
+   "stadium": "Angel Stadium",
+   "timezone": "America/Los_Angeles",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Waldbrand-Rauch (Luftqualität)",
+     "months": "Aug–Okt",
+     "severity": 3,
+     "note": "AQI-Spitzen aus Waldbränden; Spielverlegung bei gefährlicher Luftgüte."
+    },
+    {
+     "hazard": "Erdbeben (Restrisiko)",
+     "months": "ganzjährig",
+     "severity": 2,
+     "note": "Seismische Zone: Venue-Notfallpläne, Evakuierungsrouten."
+    }
+   ],
+   "trauma_center": {
+    "name": "UCI Medical Center, Orange (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "OAK": {
+   "city": "West Sacramento",
+   "stadium": "Sutter Health Park",
+   "timezone": "America/Los_Angeles",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Inland-Hitze",
+     "months": "Jun–Sep",
+     "severity": 3,
+     "note": "Heißes Binnenklima (Sacramento/Arlington)."
+    },
+    {
+     "hazard": "Waldbrand-Rauch (Luftqualität)",
+     "months": "Aug–Okt",
+     "severity": 3,
+     "note": "AQI-Spitzen aus Waldbränden; Spielverlegung bei gefährlicher Luftgüte."
+    },
+    {
+     "hazard": "Erdbeben (Restrisiko)",
+     "months": "ganzjährig",
+     "severity": 2,
+     "note": "Seismische Zone: Venue-Notfallpläne, Evakuierungsrouten."
+    }
+   ],
+   "trauma_center": {
+    "name": "UC Davis Medical Center, Sacramento (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "SEA": {
+   "city": "Seattle",
+   "stadium": "T-Mobile Park",
+   "timezone": "America/Los_Angeles",
+   "roof": "retractable",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Regen/Feuchte",
+     "months": "Apr–Mai, Sep",
+     "severity": 2,
+     "note": "Häufiger Regen; T-Mobile Park hat schließbares Dach."
+    },
+    {
+     "hazard": "Waldbrand-Rauch",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Episodische AQI-Spitzen aus regionalen Bränden."
+    }
+   ],
+   "trauma_center": {
+    "name": "Harborview Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "TEX": {
+   "city": "Arlington",
+   "stadium": "Globe Life Field",
+   "timezone": "America/Chicago",
+   "roof": "retractable",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Extreme Sommerhitze",
+     "months": "Jun–Sep",
+     "severity": 4,
+     "note": "Hitzeindex regelmäßig >40°C; Heat-Protokoll, Dach/Klimatisierung prüfen."
+    },
+    {
+     "hazard": "Schwere Frühjahrsstürme/Tornados",
+     "months": "Apr–Jun",
+     "severity": 3,
+     "note": "Tornado-Alley-Nähe: Warnketten, Schutzräume."
+    }
+   ],
+   "trauma_center": {
+    "name": "Parkland Memorial Hospital, Dallas (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "ATL": {
+   "city": "Atlanta",
+   "stadium": "Truist Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [],
+   "trauma_center": {
+    "name": null,
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "MIA": {
+   "city": "Miami",
+   "stadium": "LoanDepot Park",
+   "timezone": "America/New_York",
+   "roof": "retractable",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Hurrikan-Saison",
+     "months": "Jun–Nov",
+     "severity": 4,
+     "note": "Atlantik/Golf: Evakuierungs-/Makeup-Risiko; Storm-Tracking nötig (vgl. Milton-E2E)."
+    },
+    {
+     "hazard": "Tägliche Nachmittagsgewitter",
+     "months": "Jun–Sep",
+     "severity": 3,
+     "note": "Florida-Konvektion: häufige Blitz-Unterbrechungen."
+    },
+    {
+     "hazard": "Hitze/Schwüle",
+     "months": "Jun–Sep",
+     "severity": 3,
+     "note": "Hohe Hitzeindizes; Hydration/Heat-Protokoll."
+    }
+   ],
+   "trauma_center": {
+    "name": "Ryder Trauma Center, Jackson Memorial (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "NYM": {
+   "city": "Queens",
+   "stadium": "Citi Field",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "NewYork-Presbyterian / Weill Cornell (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "PHI": {
+   "city": "Philadelphia",
+   "stadium": "Citizens Bank Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "Penn Presbyterian / Jefferson (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "WSN": {
+   "city": "Washington",
+   "stadium": "Nationals Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "MedStar Washington Hospital Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "CHC": {
+   "city": "Chicago",
+   "stadium": "Wrigley Field",
+   "timezone": "America/Chicago",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "Northwestern Memorial Hospital (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "CIN": {
+   "city": "Cincinnati",
+   "stadium": "Great American Ball Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "University of Cincinnati Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "MIL": {
+   "city": "Milwaukee",
+   "stadium": "American Family Field",
+   "timezone": "America/Chicago",
+   "roof": "retractable",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    }
+   ],
+   "trauma_center": {
+    "name": "Froedtert Hospital (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "PIT": {
+   "city": "Pittsburgh",
+   "stadium": "PNC Park",
+   "timezone": "America/New_York",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Kälte/Frühsaison-Kaltluft",
+     "months": "Mär–Apr",
+     "severity": 2,
+     "note": "Frühe Heimspiele kalt/windig; Spielerschutz, Ausrüstung."
+    },
+    {
+     "hazard": "Sommergewitter/Schwüle",
+     "months": "Jun–Aug",
+     "severity": 2,
+     "note": "Verzögerungen durch Gewitterzellen; Blitz-Protokoll."
+    },
+    {
+     "hazard": "Tropensturm-Reste",
+     "months": "Aug–Sep",
+     "severity": 2,
+     "note": "Atlantik-Saison: Starkregen/Wind aus Reststürmen möglich."
+    }
+   ],
+   "trauma_center": {
+    "name": "UPMC Presbyterian (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "STL": {
+   "city": "St. Louis",
+   "stadium": "Busch Stadium",
+   "timezone": "America/Chicago",
+   "roof": "open",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Schwere Gewitter/Tornado-Risiko",
+     "months": "Apr–Aug",
+     "severity": 3,
+     "note": "Kontinentale Konvektion: Warnketten, Schutzräume, Blitz-Protokoll."
+    },
+    {
+     "hazard": "Kälte Früh-/Spätsaison",
+     "months": "Mär–Apr, Sep",
+     "severity": 2,
+     "note": "Kaltlufteinbrüche, Wind; Spielerschutz."
+    },
+    {
+     "hazard": "Sommerhitze",
+     "months": "Jul–Aug",
+     "severity": 3,
+     "note": "Anhaltende Hitzewellen in der Mitte des Kontinents."
+    }
+   ],
+   "trauma_center": {
+    "name": "Barnes-Jewish Hospital (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "ARI": {
+   "city": "Phoenix",
+   "stadium": "Chase Field",
+   "timezone": "America/Phoenix",
+   "roof": "retractable",
+   "congestion": 1.35,
+   "detour": 1.35,
+   "route_redundancy": 2,
+   "climate_hazards": [
+    {
+     "hazard": "Extremhitze",
+     "months": "Jun–Sep",
+     "severity": 4,
+     "note": "Phoenix regelmäßig >43°C — Dach (Chase Field) schließen; Heat-Protokoll für Außenaktivitäten."
+    },
+    {
+     "hazard": "Monsun-Stürme/Staub (Haboob)",
+     "months": "Jul–Sep",
+     "severity": 3,
+     "note": "Plötzliche Staub-/Gewitterfronten, Sichtweite/Verkehr."
+    }
+   ],
+   "trauma_center": {
+    "name": "Banner–University Medical Center Phoenix (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "COL": {
+   "city": "Denver",
+   "stadium": "Coors Field",
+   "timezone": "America/Denver",
+   "roof": "open",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Höhenlage 1.610 m",
+     "months": "ganzjährig",
+     "severity": 2,
+     "note": "Dünne Luft: veränderte Ballflugbahn, Konditionierung der Gastteams; Hydration."
+    },
+    {
+     "hazard": "Frühjahrsschnee",
+     "months": "Apr–Mai",
+     "severity": 3,
+     "note": "Spät-Schnee/Hagel; Spielausfälle/Makeups möglich."
+    },
+    {
+     "hazard": "Hagel/rasche Wetterwechsel",
+     "months": "Mai–Aug",
+     "severity": 2,
+     "note": "Front-Range-Konvektion."
+    }
+   ],
+   "trauma_center": {
+    "name": "Denver Health Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "LAD": {
+   "city": "Los Angeles",
+   "stadium": "Dodger Stadium",
+   "timezone": "America/Los_Angeles",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Waldbrand-Rauch (Luftqualität)",
+     "months": "Aug–Okt",
+     "severity": 3,
+     "note": "AQI-Spitzen aus Waldbränden; Spielverlegung bei gefährlicher Luftgüte."
+    },
+    {
+     "hazard": "Erdbeben (Restrisiko)",
+     "months": "ganzjährig",
+     "severity": 2,
+     "note": "Seismische Zone: Venue-Notfallpläne, Evakuierungsrouten."
+    }
+   ],
+   "trauma_center": {
+    "name": "LAC+USC Medical Center (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "SDP": {
+   "city": "San Diego",
+   "stadium": "Petco Park",
+   "timezone": "America/Los_Angeles",
+   "roof": "open",
+   "congestion": 1.6,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Waldbrand-Rauch (Luftqualität)",
+     "months": "Aug–Okt",
+     "severity": 3,
+     "note": "AQI-Spitzen aus Waldbränden; Spielverlegung bei gefährlicher Luftgüte."
+    },
+    {
+     "hazard": "Erdbeben (Restrisiko)",
+     "months": "ganzjährig",
+     "severity": 2,
+     "note": "Seismische Zone: Venue-Notfallpläne, Evakuierungsrouten."
+    }
+   ],
+   "trauma_center": {
+    "name": "UC San Diego Health (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  },
+  "SFG": {
+   "city": "San Francisco",
+   "stadium": "Oracle Park",
+   "timezone": "America/Los_Angeles",
+   "roof": "open",
+   "congestion": 2.0,
+   "detour": 1.35,
+   "route_redundancy": 3,
+   "climate_hazards": [
+    {
+     "hazard": "Waldbrand-Rauch (Luftqualität)",
+     "months": "Aug–Okt",
+     "severity": 3,
+     "note": "AQI-Spitzen aus Waldbränden; Spielverlegung bei gefährlicher Luftgüte."
+    },
+    {
+     "hazard": "Erdbeben (Restrisiko)",
+     "months": "ganzjährig",
+     "severity": 2,
+     "note": "Seismische Zone: Venue-Notfallpläne, Evakuierungsrouten."
+    },
+    {
+     "hazard": "Wind/Nebel (Bucht)",
+     "months": "Apr–Aug",
+     "severity": 2,
+     "note": "Abendkühle/Wind am Wasser; Kleidung/Konditionierung."
+    }
+   ],
+   "trauma_center": {
+    "name": "Zuckerberg San Francisco General (Level I)",
+    "note": "Principal Metro Level I; Game-Day-On-Call-Routing mit lokalem EMS-Liaison bestätigen."
+   }
+  }
+ }
+}

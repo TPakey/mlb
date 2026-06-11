@@ -1,0 +1,40 @@
+{
+  "_source": "docs/MILTON_GOLD_STANDARD.md",
+  "_description": "Hurricane Milton, Oktober 2024 — Tropicana Field zerstoert. Die echte MLB-Reaktion war, die gesamte 2025-Heimsaison der Rays nach Steinbrenner Field zu verlegen. Wir modellieren das hier in der Saison 2026 als Generalprobe.",
+
+  "disruption": {
+    "kind": "stadium_blackout",
+    "home_team": "TBR",
+    "start_date": "2026-04-01",
+    "end_date": "2026-06-30",
+    "reason": "Tropicana Field — Folge-Reparaturen nach Hurricane Milton (modelliert als 3-Monats-Blackout zum Test der drei Strategien)"
+  },
+
+  "_note_scope": "Wir testen mit 3 Monaten statt voller Saison, weil ein 6-Monats-Blackout im Modell zu fundamentalen Quoten-Verletzungen fuehren wuerde (alle TBR-Heimspiele liegen im Fenster). Die Methodik ist identisch, das Szenario ist nur kuerzer.",
+
+  "historic_mlb_response": {
+    "replacement_venue": "George M. Steinbrenner Field, Tampa, FL",
+    "capacity": 11026,
+    "schedule_front_loading": {
+      "home_games_first_22": 19,
+      "home_games_first_59": 47,
+      "home_games_july_august": 16,
+      "away_games_last_103": 69
+    },
+    "series_swaps": [
+      {"with": "LAA", "type": "home-and-home reordered"},
+      {"with": "MIN", "type": "home-and-home reordered"}
+    ],
+    "first_pitch_time_change": {
+      "from": "19:05",
+      "to": "19:35",
+      "effective_from": "June"
+    },
+    "result": "Null Regenausfaelle in der Heimsaison 2025; Rueckkehr Tropicana 06.04.2026"
+  },
+
+  "benchmark_dimensions": {
+    "home_games_before_june_target_pct": 80,
+    "home_games_july_august_target_pct": 31
+  }
+}
