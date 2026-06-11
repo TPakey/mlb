@@ -272,6 +272,7 @@ def pareto_frontier(req: ParetoRequest) -> ParetoResponse:
         master_seed=req.seed,
         sa_iterations=req.sa_iterations,
         n_interior_points=req.n_interior_points,
+        publishable_only=True,   # P1-5: API liefert nur publizierbare Punkte
     )
     plans = [
         ParetoBundleOut(

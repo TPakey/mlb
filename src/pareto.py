@@ -214,6 +214,10 @@ def sample_pareto_frontier(
     sa_geo_topk: int = 2,
     sa_feas_lambda: float = 0.0,
     sa_holiday_lambda: float = 0.0,
+    # Nacht-Härtung 2026-06-11 (Assessment P1-5): Output-Pfade liefern nur noch
+    # PUBLIZIERBARE Punkte (Publish-Gate je Punkt). Default False = unverändertes
+    # Verhalten für Forschungs-/Test-Pfade; main/api setzen True.
+    publishable_only: bool = False,
 ) -> ParetoFrontier:
     """Berechnet die Pareto-Front über alle 8 Score-Dimensionen.
 
@@ -408,6 +412,26 @@ def sample_pareto_frontier(
                 logger.info(f"  Publish-Gate [{p.label}]: {g.summary()}")
     except Exception as exc:  # pragma: no cover — Gate darf Pareto nie crashen
         logger.warning(f"Publish-Gate-Messung fehlgeschlagen: {exc}")
+
+    # publishable_only (P1-5): nicht publizierbare Punkte werden im
+    # Auslieferungsmodus VERWORFEN statt nur markiert — dieselbe Fehlerklasse
+    # wie P0-1 (Output ohne Gate-Durchsetzung). Faellt ALLES durch, bleibt die
+    # markierte Frontier mit degraded-Diagnose erhalten (ehrlich, kein
+    # stiller Leer-Output).
+    if publishable_only:
+        pub = [p for p in non_dominated if p.publishable]
+        if pub:
+            dropped = len(non_dominated) - len(pub)
+            if dropped:
+                diagnostic = (diagnostic + " " if diagnostic else "") + (
+                    f"publishable_only: {dropped} nicht publizierbare(r) "
+                    f"Punkt(e) verworfen.")
+            non_dominated = pub
+        else:
+            degraded = True
+            diagnostic = (diagnostic + " " if diagnostic else "") + (
+                "publishable_only: KEIN Punkt publizierbar — Frontier nur "
+                "markiert zurueckgegeben (Gate-Summaries je Punkt pruefen).")
 
     wall_time = time.time() - wall_start
 

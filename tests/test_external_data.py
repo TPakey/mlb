@@ -362,3 +362,31 @@ def test_c1_gate_receipts_reference():
     rho = spearman([rm["base_team"][t] for t in ts], [recent[t] for t in ts])
     assert rho > 0.9, f"Spearman {rho:.3f}"
     assert "_sportico_internal_anchors_2024" in gd     # Kalibrier-Anker da
+
+
+# ---------- Nacht-Härtung P1-5: Pareto-Auslieferung nur publizierbar ----------
+
+def test_pareto_publishable_only_filters_frontier():
+    """Auslieferungs-Modus (main --pareto / api): nicht publizierbare Punkte
+    werden VERWORFEN (vorher nur markiert — dieselbe Fehlerklasse wie P0-1).
+    Gemessen real 2024 @4k Iter: 7 Punkte, nur 2 publizierbar → Filter liefert
+    exakt diese 2; Forschungs-Default (False) bleibt unverändert."""
+    from src.data_loader import load_teams
+    from src.datasources.local_file import LocalFileAdapter
+    from src.season import detect_all_star_break
+    from src.generator import GeneratorConfig
+    from src.pareto import sample_pareto_frontier
+    teams = load_teams()
+    real = LocalFileAdapter(base_dir=DATA).fetch_season_schedule(2024)
+    cfg = GeneratorConfig(season=2024, season_start=real.season_start,
+                          season_end=real.season_end,
+                          all_star_break=detect_all_star_break(real),
+                          num_search_workers=1, random_seed=42)
+    kw = dict(master_seed=42, sa_iterations=4000, n_interior_points=0,
+              sa_move_mix_geo=0.35)
+    a = sample_pareto_frontier(real, teams, cfg, **kw)
+    n_pub = sum(1 for p in a.points if p.publishable)
+    assert n_pub < len(a.points)            # Fehlerklasse existiert ohne Filter
+    b = sample_pareto_frontier(real, teams, cfg, publishable_only=True, **kw)
+    assert len(b.points) == n_pub and all(p.publishable for p in b.points)
+    assert "verworfen" in b.diagnostic

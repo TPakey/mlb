@@ -321,6 +321,8 @@ def run_generate(args) -> int:
             sa_geo_topk=args.geo_topk,
             sa_feas_lambda=args.feas_lambda,
             sa_holiday_lambda=args.holiday_lambda,
+            # P1-5: Auslieferungsmodus liefert nur publizierbare Punkte.
+            publishable_only=(getattr(args, "mode", "publizierbar") == "publizierbar"),
         )
         logger.info(f"  Nicht-dominierte Pläne: {len(frontier.points)}")
         for p in frontier.points:
