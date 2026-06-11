@@ -38,6 +38,10 @@ GETAWAY_INFLIGHT_THRESHOLD_MIN = 150   # 2 1/2 h — V(C)(8)-Schwelle
 NIGHTDAY_FLOOR_MIN = 17 * 60       # 5 P.M. — V(C)(9)-Untergrenze
 NIGHTDAY_PRIOR_NIGHT_MIN = 19 * 60  # 7 P.M. — V(C)(9) „prior evening start ≥ 7 P.M."
 SHORT_INFLIGHT_MIN = 90            # 1 1/2 h — V(C)(9)-Ausnahme-Schwelle
+# Empirische per-Club First-Pitch-Konvention: nominale 7-PM-Anker, reale
+# Erstwuerfe bis ~19:40 (z. B. Braves 19:20, Rays 19:35). Einheitliche Quelle
+# fuer V(C)(8)- und TV-Pin-Checks (compliance.py nutzt dieselbe Konstante).
+GETAWAY_CONVENTION_TOL_MIN = 40
 # --- V(C)(5) (Review-Runde 2, Punkt 3) ---
 VC5_LATEST_PRIOR_MIN = 17 * 60     # 5 P.M. — späteste Startzeit vor Day-DH-Folgetag
 DAY_DH_FIRST_MAX_MIN = 16 * 60     # erstes DH-Spiel < 16:00 = "day doubleheader"
@@ -557,6 +561,81 @@ def validate_day_min_times(
 # ====================================================================
 # Echte Startzeiten aus dem MLB-Stats-API-JSON extrahieren (für Messung)
 # ====================================================================
+
+def build_tv_pins(season: Season, broadcasts_path: Path,
+                  real_start_min: Dict[int, int]) -> Dict[int, int]:
+    """TV-Pins (game_pk → Startminute) für Spiele mit NATIONALEM TV
+    (Nacht-Härtung 2026-06-11, P1-7: von Validierung zu Constraint).
+
+    Quelle: ``data/mlb_broadcasts_<jahr>.json`` (Fakten, Rating A) × reale
+    Startzeiten — d. h. die vertraglich gesendeten nationalen Fenster werden
+    als HARTE Pins in ``assign_start_times(tv_pins=…)`` gereicht. Für künftige
+    Saisons ersetzen Broadcaster-Vertragsfenster die realen Zeiten (C2-Ausbau).
+    Deterministisch; leeres Dict, wenn keine Fakten-Datei existiert."""
+    p = Path(broadcasts_path)
+    if not p.exists():
+        return {}
+    payload = json.loads(p.read_text(encoding="utf-8"))
+    national = {int(k) for k in payload.get("national_tv_by_game_pk", {})}
+    return {g.game_pk: real_start_min[g.game_pk]
+            for g in season.games
+            if g.game_pk in national and g.game_pk in real_start_min}
+
+
+def validate_tv_pins(season: Season, start_min: Dict[int, int],
+                     tv_pins: Dict[int, int], appendix_c: "AppendixC",
+                     *, espn_snb_pks: Optional[set] = None,
+                     rescheduled_pks: Optional[set] = None) -> List[StartTimeViolation]:
+    """Erzwingungs-Check für TV-Pins (P1-7):
+
+    1. **Pin-Treue:** jede zugewiesene Zeit eines gepinnten Spiels muss EXAKT
+       der Pin-Zeit entsprechen (Netzwerk-Fenster sind vertraglich hart).
+    2. **Pin-CBA-Konflikte:** ein Pin, der V(C)(8) (Getaway-Grenze; SNB/
+       Reschedules ausgenommen) oder V(C)(5) (Spätstart vor Day-DH) bricht,
+       wird als Konflikt gemeldet — das ist die Planungs-Information, die ein
+       Scheduler VOR der Vertragsfixierung braucht."""
+    espn_snb_pks = espn_snb_pks or set()
+    rescheduled_pks = rescheduled_pks or set()
+    viols: List[StartTimeViolation] = []
+    by_pk = {g.game_pk: g for g in season.games}
+    # 1) Pin-Treue
+    for pk, pinned in sorted(tv_pins.items()):
+        got = start_min.get(pk)
+        g = by_pk.get(pk)
+        if g is None:
+            continue
+        if got != pinned:
+            viols.append(StartTimeViolation(
+                rule="TV-PIN", game_pk=pk, game_date=g.date, venue_team=g.home,
+                detail=f"Pin {fmt_min(pinned)} nicht übernommen "
+                       f"(zugewiesen: {fmt_min(got)})"))
+    # 2) Pin vs. V(C)(8)-Getaway-Grenze — mit derselben ±40-min-First-Pitch-
+    # Konvention wie STARTTIME-GETAWAY (nominale 7-PM-Anker, reale Erstwuerfe
+    # 19:05-19:40; ohne Toleranz waeren 19:05-Pins falsch-positive Konflikte).
+    contexts = find_getaway_contexts(season, appendix_c)
+    for pk, pinned in sorted(tv_pins.items()):
+        g = by_pk.get(pk)
+        if g is None or pk in espn_snb_pks or pk in rescheduled_pks:
+            continue
+        ctx = contexts.get((g.date, g.home))
+        if ctx is not None and pinned > ctx.latest_start_min + GETAWAY_CONVENTION_TOL_MIN:
+            viols.append(StartTimeViolation(
+                rule="TV-PIN/V(C)(8)", game_pk=pk, game_date=g.date,
+                venue_team=g.home,
+                detail=f"Pin {fmt_min(pinned)} > Getaway-Grenze "
+                       f"{fmt_min(ctx.latest_start_min)} — Netzwerk-Fenster "
+                       f"kollidiert mit CBA (vor Vertragsfixierung klären)"))
+    # 3) Pin vs. V(C)(5) (Spätstart vor Day-DH des Folgetags)
+    pinned_min = {pk: m for pk, m in tv_pins.items()}
+    merged = dict(start_min); merged.update(pinned_min)
+    for v in validate_day_dh_prior_times(season, merged,
+                                         rescheduled_pks=rescheduled_pks):
+        if v.game_pk in tv_pins:
+            viols.append(StartTimeViolation(
+                rule="TV-PIN/V(C)(5)", game_pk=v.game_pk, game_date=v.game_date,
+                venue_team=v.venue_team, detail="Pin: " + v.detail))
+    return viols
+
 
 def find_day_dh_days(season: Season, start_min: Dict[int, int]) -> Dict[str, set]:
     """Club → Tage, an denen der Club ein DAY-Doubleheader spielt (erstes

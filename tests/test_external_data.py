@@ -450,3 +450,35 @@ def test_ptet_league_exemption_with_start_times(tbi):
     s8 = Season(season=2026, games=big, season_start=base, season_end=base + _td(days=40))
     c8 = _check_pt_et_offday(s8, ["NYY"], tbi, start_min=sm)
     assert not c8.passed and len(c8.offenders) == 1 and ">7 Ausnahmen" in c8.offenders[0]
+
+
+# ---------- Nacht-Härtung P1-7: TV-Pins als harte Fenster ----------
+
+def test_tv_pins_enforced_and_conflicts_detected(tbi):
+    """TV-Pins (aus Broadcast-Fakten) werden im Zuweiser EXAKT übernommen
+    (real 2024: 691/691, 2025: 594/594, je 0 CBA-Konflikte — gemessen);
+    synthetisch: ein nicht übernommener Pin und ein V(C)(8)-brechender Pin
+    werden vom Validator gemeldet."""
+    from datetime import date as _d, timedelta as _td
+    from pathlib import Path as _P
+    from src.season import Game, Season
+    from src.start_times import (AppendixC, assign_start_times, build_tv_pins,
+                                 validate_tv_pins, load_real_start_times)
+    ac = AppendixC.load()
+    from src.datasources.local_file import LocalFileAdapter
+    s24 = LocalFileAdapter(base_dir=DATA).fetch_season_schedule(2024)
+    real = load_real_start_times(DATA / "mlb_schedule_2024.json", tbi)
+    pins = build_tv_pins(s24, DATA / "mlb_broadcasts_2024.json", real)
+    assert len(pins) > 600
+    asg = assign_start_times(s24, ac, tv_pins=pins)
+    amin = {pk: a.local_start_min for pk, a in asg.items()}
+    assert all(amin[pk] == m for pk, m in pins.items())   # Pin-Treue 100%
+    # Synthetik: BOS->SEA-Getaway (inflight >> 2:30) mit 19:00-Pin = Konflikt;
+    # plus ein Pin, der nicht uebernommen wurde.
+    base = _d(2026, 6, 1)
+    g = [Game(1, base, "BOS", "NYY", "BOS"), Game(2, base + _td(days=1), "SEA", "BOS", "SEA")]
+    s = Season(season=2026, games=g, season_start=base, season_end=base + _td(days=20))
+    v = validate_tv_pins(s, {1: 13 * 60, 2: 19 * 60}, {1: 19 * 60}, ac)
+    rules = {x.rule for x in v}
+    assert "TV-PIN" in rules               # Pin 19:00, zugewiesen 13:00
+    assert "TV-PIN/V(C)(8)" in rules       # 19:00 > Grenze (BOS->SEA ~6h Flug)

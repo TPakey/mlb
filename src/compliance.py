@@ -478,9 +478,8 @@ def _check_pt_et_offday(season: Season, team_ids: List[str], teams_by_id,
 
 # --- Sprint 5.1: Startzeit-Checks (gegated — nur aktiv mit zugewiesenen Zeiten) ---
 
-# Empirische per-Club First-Pitch-Konvention: nominale 7-PM-Anker, reale Erstwürfe
-# bis ~7:40 (Braves 7:20, Rays 7:35). Gemessen an real 2024/2025 → 0 Verstöße.
-_GETAWAY_CONVENTION_TOL_MIN = 40
+# First-Pitch-Konvention: einheitliche Quelle in src.start_times (Nacht-Härtung).
+from .start_times import GETAWAY_CONVENTION_TOL_MIN as _GETAWAY_CONVENTION_TOL_MIN
 
 
 def _skipped_starttime_check(rule_id: str) -> ComplianceCheck:
