@@ -107,10 +107,12 @@ RULES: Dict[str, ComplianceRule] = {
                   "regulations/CBA_2022-2026_Article_V_Scheduling.md.",
         definition_doc="regulations/CBA_2022-2026_Article_V_Scheduling.md",
         mechanism="Detektion: für jedes Team kein konsekutiver Spieltag PT-Stadt → "
-                  "ET-Stadt ohne dazwischenliegenden Off-Day. Konservativ: die ≤7 "
-                  "Liga-Ausnahmen (späte ET-Startzeit) werden NICHT modelliert (brauchen "
-                  "Startzeiten, Sprint 5.1) — wir erzwingen den strikten Default, was nur "
-                  "strenger ist. Realer 2024+2025-Plan: 0 solche Transfers (gemessen).",
+                  "ET-Stadt ohne dazwischenliegenden Off-Day. OHNE Startzeiten strikt "
+                  "(nur strenger als das CBA). MIT Startzeiten (Nacht-Härtung "
+                  "2026-06-11) ist die ≤7-Liga-Ausnahme modelliert: ET-Start >19:00 + "
+                  "PT-Vortagsstart <17:00 + Einzelspiel am ET-Tag (Satz 2), max. 7 je "
+                  "Liga (chronologisch, ab dem 8. Verstoß). Real 2024+2025: 0 rohe "
+                  "Transfers (gemessen) — Ausnahme ändert dort nichts.",
         severity="hard",
         limit_text="0 PT→ET-Spieltagsfolgen ohne Off-Day (PT=America/Los_Angeles; "
                    "ET=America/New_York, America/Toronto)",
@@ -411,35 +413,64 @@ _PT_ZONES = {"America/Los_Angeles"}
 _ET_ZONES = {"America/New_York", "America/Toronto"}
 
 
-def _check_pt_et_offday(season: Season, team_ids: List[str], teams_by_id) -> ComplianceCheck:
+def _check_pt_et_offday(season: Season, team_ids: List[str], teams_by_id,
+                        start_min: Optional[Dict[int, int]] = None) -> ComplianceCheck:
     """CBA V(C)(11): Reise Pacific→Eastern erfordert einen Off-Day.
 
-    Konservativ (die ≤7 Liga-Ausnahmen mit später ET-Startzeit sind ohne Startzeit-
-    Modell nicht verifizierbar → wir erzwingen den strikten Default): ein Verstoß ist
-    jeder konsekutive Spieltag eines Teams von einer PT-Stadt zu einer ET-Stadt OHNE
-    dazwischenliegenden Off-Day. Spielort = Heim-Team der Partie.
+    OHNE Startzeiten (Default-/Gate-Pfad): strikter Standard — jeder konsekutive
+    PT→ET-Spieltag ohne Off-Day ist ein Verstoß (nur strenger als das CBA).
+
+    MIT Startzeiten (Nacht-Härtung 2026-06-11, P1-6): die ≤7-Liga-Ausnahme aus
+    dem Verbatim wird modelliert — ein PT→ET-Folgetag ist ENTSCHULDBAR, wenn
+    (a) das ET-Spiel nach 19:00 Lokalzeit startet, (b) das PT-Spiel am Vortag
+    vor 17:00 startete, (c) der Club am ET-Tag nur EIN Spiel hat (Satz 2:
+    'no Club may be scheduled to play more than one game in the ET the day
+    after…'), und (d) liga-weit ≤7 solcher Fälle je Liga (AL/NL, Liga des
+    reisenden Clubs; Überzählige ab dem 8. — chronologisch — sind Verstöße).
     """
     offenders: List[str] = []
+    exempt_by_league: Dict[str, List[str]] = {}
     for t in team_ids:
         gs = season.games_for_team(t)
-        # distinkte Spieltage mit Spielort (ein Team spielt pro Tag an einem Ort)
-        dayvenue: List[tuple] = []
-        seen = set()
+        by_date: Dict = {}
         for g in gs:
-            if g.date not in seen:
-                seen.add(g.date)
-                dayvenue.append((g.date, g.home))
-        for (d1, v1), (d2, v2) in zip(dayvenue, dayvenue[1:]):
+            by_date.setdefault(g.date, []).append(g)
+        days = sorted(by_date)
+        for d1, d2 in zip(days, days[1:]):
             if (d2 - d1).days != 1:
                 continue  # Off-Day vorhanden → ok
+            v1, v2 = by_date[d1][0].home, by_date[d2][0].home
             tz1 = teams_by_id[v1].timezone if v1 in teams_by_id else None
             tz2 = teams_by_id[v2].timezone if v2 in teams_by_id else None
-            if tz1 in _PT_ZONES and tz2 in _ET_ZONES:
-                offenders.append(f"{t}: {v1}({d1})→{v2}({d2}) ohne Off-Day")
+            if not (tz1 in _PT_ZONES and tz2 in _ET_ZONES):
+                continue
+            if start_min is not None:
+                pt_starts = [start_min.get(g.game_pk) for g in by_date[d1]]
+                et_games = by_date[d2]
+                et_start = start_min.get(et_games[0].game_pk)
+                if (len(et_games) == 1
+                        and et_start is not None and et_start > 19 * 60
+                        and pt_starts and pt_starts[0] is not None
+                        and pt_starts[0] < 17 * 60):
+                    league = getattr(teams_by_id.get(t), "league", "?")
+                    exempt_by_league.setdefault(league, []).append(
+                        f"{t}: {v1}({d1})→{v2}({d2}) [Ausnahme-Kandidat]")
+                    continue
+            offenders.append(f"{t}: {v1}({d1})→{v2}({d2}) ohne Off-Day")
+    # Liga-Limit: ab dem 8. Ausnahme-Kandidaten je Liga (chronologisch sortiert,
+    # deterministisch) wird es ein Verstoß.
+    n_exempt = 0
+    for league in sorted(exempt_by_league):
+        cands = sorted(exempt_by_league[league])
+        n_exempt += min(len(cands), 7)
+        for over in cands[7:]:
+            offenders.append(over.replace("[Ausnahme-Kandidat]",
+                                          f"[>7 Ausnahmen in Liga {league}]"))
+    note = f"; {n_exempt} via ≤7-Liga-Ausnahme (V(C)(11), Startzeiten)" if n_exempt else ""
     return ComplianceCheck(
         rule_id="CBA-PTET", passed=not offenders,
-        measured=f"{len(offenders)} PT→ET-Spieltagsfolge(n) ohne Off-Day",
-        detail=("keine PT→ET-Reise ohne Off-Day"
+        measured=f"{len(offenders)} PT→ET-Spieltagsfolge(n) ohne Off-Day{note}",
+        detail=("keine PT→ET-Reise ohne Off-Day (Ausnahmen geprüft)"
                 if not offenders else f"{len(offenders)} PT→ET-Transfer(s) ohne Off-Day"),
         offenders=offenders,
     )
@@ -757,7 +788,7 @@ def compliance_report(
     checks = [
         _check_ac218(season, team_ids),
         _check_ac219(season, team_ids),
-        _check_pt_et_offday(season, team_ids, teams_by_id),
+        _check_pt_et_offday(season, team_ids, teams_by_id, start_min=start_min),
         _check_162(season, team_ids, expected_games, reference_counts=reference_counts),
         _check_home_away(season, team_ids, expected_games // 2),
         _check_feasibility(season, team_ids, teams_by_id, thresholds),

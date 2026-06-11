@@ -408,3 +408,45 @@ def test_asb_check_is_per_team(tbi):
                             teams_by_id=tbi).get("CBA-ASB")
     assert not c26.passed and "28/30" in c26.measured
     assert {o.split(":")[0] for o in c26.offenders} == {"NYM", "PHI"}
+
+
+# ---------- Nacht-Härtung P1-6: PTET-≤7-Liga-Ausnahme (V(C)(11)) ----------
+
+def test_ptet_league_exemption_with_start_times(tbi):
+    """Mit Startzeiten greift die ≤7-Liga-Ausnahme: PT-Spiel <17:00 + ET-Spiel
+    >19:00 + Einzelspiel = entschuldbar; frühes ET-Spiel, ET-Doubleheader und
+    der 8. Fall je Liga bleiben Verstöße. Ohne Startzeiten: strikt wie bisher."""
+    from datetime import date as _d, timedelta as _td
+    from src.season import Game, Season
+    from src.compliance import _check_pt_et_offday
+    base = _d(2026, 6, 1)
+    def mk(pk, day, home, away):
+        return Game(pk, base + _td(days=day), home, away, home)
+    # NYY: LAD(PT) Tag0 -> NYY(ET) Tag1
+    games = [mk(1, 0, "LAD", "NYY"), mk(2, 1, "NYY", "BOS")]
+    s = Season(season=2026, games=games, season_start=base, season_end=base + _td(days=30))
+    # strikt (ohne start_min): Verstoß
+    assert not _check_pt_et_offday(s, ["NYY"], tbi).passed
+    # Ausnahme erfüllt: PT 13:05, ET 19:10
+    ok = _check_pt_et_offday(s, ["NYY"], tbi, start_min={1: 13*60+5, 2: 19*60+10})
+    assert ok.passed and "Liga-Ausnahme" in ok.measured
+    # ET zu früh (18:00): Verstoß trotz Startzeiten
+    assert not _check_pt_et_offday(s, ["NYY"], tbi, start_min={1: 13*60, 2: 18*60}).passed
+    # PT zu spät gestartet (19:00): Verstoß
+    assert not _check_pt_et_offday(s, ["NYY"], tbi, start_min={1: 19*60, 2: 19*60+10}).passed
+    # Satz 2: Doubleheader am ET-Tag => Verstoß
+    g_dh = games + [Game(3, base + _td(days=1), "NYY", "BOS", "NYY", doubleheader_seq=2)]
+    s_dh = Season(season=2026, games=g_dh, season_start=base, season_end=base + _td(days=30))
+    assert not _check_pt_et_offday(s_dh, ["NYY"], tbi,
+                                   start_min={1: 13*60, 2: 19*60+10, 3: 23*60}).passed
+    # Liga-Limit: 8 AL-Faelle -> der 8. ist Verstoß
+    big = []
+    sm = {}
+    for i in range(8):
+        pk1, pk2 = 100 + 2*i, 101 + 2*i
+        big += [Game(pk1, base + _td(days=3*i), "LAA", "NYY", "LAA"),
+                Game(pk2, base + _td(days=3*i+1), "NYY", "BOS", "NYY")]
+        sm[pk1] = 13*60; sm[pk2] = 19*60+10
+    s8 = Season(season=2026, games=big, season_start=base, season_end=base + _td(days=40))
+    c8 = _check_pt_et_offday(s8, ["NYY"], tbi, start_min=sm)
+    assert not c8.passed and len(c8.offenders) == 1 and ">7 Ausnahmen" in c8.offenders[0]
