@@ -659,8 +659,12 @@ def _check_venue_availability(season: Season, events) -> ComplianceCheck:
 
 
 def _check_asb_length(season: Season) -> ComplianceCheck:
-    """CBA V(C)(17): erkannter All-Star-Break muss 4 Tage lang sein (weich,
-    weil Erkennung heuristisch; Review-Runde 2, Punkt 9)."""
+    """CBA V(C)(17): All-Star-Break = 4 Tage — gemessen PRO TEAM, nicht
+    league-wide (Nacht-Härtung 2026-06-11, Assessment-Befund B2: 2026 spielen
+    NYM@PHI ein Einzelspiel am Do nach dem ASG, die league-wide-Lücke schrumpft
+    dadurch auf 3 Tage, obwohl 28/30 Teams die vollen 4 Tage haben — die alte
+    Messung meldete fälschlich einen Liga-Befund statt der 2 Ausnahme-Teams).
+    Weich, weil Einzelspiel-Ausnahmen V(C)(18)-Waiver-Klasse sind."""
     from .season import detect_all_star_break
     asb = detect_all_star_break(season)
     if asb is None:
@@ -670,14 +674,29 @@ def _check_asb_length(season: Season) -> ComplianceCheck:
             detail="detect_all_star_break fand keine plausible Liga-Pause "
                    "(V(C)(17) verlangt 4 Tage)",
             offenders=[])
-    days = (asb[1] - asb[0]).days + 1
+    team_ids = sorted({g.home for g in season.games} | {g.away for g in season.games})
+    offenders: List[str] = []
+    breaks: List[int] = []
+    for t in team_ids:
+        days = sorted({g.date for g in season.games if g.involves(t)})
+        last_before = max((d for d in days if d < asb[0]), default=None)
+        first_after = min((d for d in days if d > asb[1]), default=None)
+        if last_before is None or first_after is None:
+            continue
+        free = (first_after - last_before).days - 1
+        breaks.append(free)
+        if free < 4:
+            offenders.append(f"{t}: nur {free} ASB-Tage frei "
+                             f"({last_before}→{first_after})")
+    n_ok = sum(1 for b in breaks if b >= 4)
     return ComplianceCheck(
-        rule_id="CBA-ASB", passed=(days == 4),
-        measured=f"erkannter ASB {asb[0]}..{asb[1]} = {days} Tage (Soll 4)",
-        detail=("All-Star-Break vertragskonform 4 Tage" if days == 4
-                else f"erkannte ASB-Länge {days} ≠ 4 Tage (Heuristik prüfen / "
-                     f"Disruption-Artefakt?)"),
-        offenders=[] if days == 4 else [f"ASB {asb[0]}..{asb[1]} ({days} Tage)"])
+        rule_id="CBA-ASB", passed=not offenders,
+        measured=(f"per-Team-ASB um {asb[0]}..{asb[1]}: {n_ok}/{len(breaks)} "
+                  f"Teams mit ≥4 freien Tagen"),
+        detail=("alle Teams mit vertragskonformem 4-Tage-Break" if not offenders
+                else f"{len(offenders)} Team(s) unter 4 Tagen (Einzelspiel-"
+                     f"Special? → V(C)(18)-Waiver-Klasse, weich)"),
+        offenders=offenders)
 
 
 def _check_holiday_pins(season: Season) -> ComplianceCheck:

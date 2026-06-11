@@ -390,3 +390,21 @@ def test_pareto_publishable_only_filters_frontier():
     b = sample_pareto_frontier(real, teams, cfg, publishable_only=True, **kw)
     assert len(b.points) == n_pub and all(p.publishable for p in b.points)
     assert "verworfen" in b.diagnostic
+
+
+# ---------- Nacht-Härtung B2/P1-6: per-Team-ASB-Check (V(C)(17)) ----------
+
+def test_asb_check_is_per_team(tbi):
+    """Die alte league-wide-ASB-Messung meldete 2026 fälschlich '3 Tage Liga-
+    Befund'; per-Team gemessen haben 28/30 Teams die vollen 4 Tage und genau
+    NYM/PHI 3 (Einzelspiel 16.07., V(C)(18)-Waiver-Klasse). 2024/2025: 30/30."""
+    from src.compliance import compliance_report
+    from src.datasources.local_file import LocalFileAdapter
+    for y in (2024, 2025):
+        s = LocalFileAdapter(base_dir=DATA).fetch_season_schedule(y)
+        c = compliance_report(s, teams_by_id=tbi).get("CBA-ASB")
+        assert c.passed and "30/30" in c.measured, (y, c.measured)
+    c26 = compliance_report(load_retrosheet_schedule(2026),
+                            teams_by_id=tbi).get("CBA-ASB")
+    assert not c26.passed and "28/30" in c26.measured
+    assert {o.split(":")[0] for o in c26.offenders} == {"NYM", "PHI"}
