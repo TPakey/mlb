@@ -124,6 +124,28 @@ def step_measure_original(years) -> bool:
               f"V(C)(13)={len(off)}, V(C)(14/15)={len(dh)}")
         for v in (off + dh)[:8]:
             print(f"      {v.rule} {v.team}: {v.detail[:90]}")
+        # Nacht-Härtung P2 (Assessment-Befund B1): ENVELOPE-RE-VALIDIERUNG —
+        # die Reise-Schwelle wurde 2026 schon einmal durch einen neuen
+        # Originalplan falsifiziert (4200 -> 4350). Jeder neue Originalplan
+        # prueft sie deshalb automatisch erneut.
+        from src.feasibility import DEFAULT_THRESHOLDS, feasibility_report
+        from src.data_loader import load_teams, teams_by_id as _tbi
+        tb = _tbi(load_teams())
+        team_ids = sorted({g.home for g in orig.games})
+        rep = feasibility_report(orig, team_ids, tb)
+        mx = rep.max_consecutive_km
+        thr = DEFAULT_THRESHOLDS.max_real_consecutive_km
+        if mx > thr:
+            print(f"      ⚠ ENVELOPE FALSIFIZIERT: Originalplan legt {mx:.0f} km "
+                  f"Back-to-Back > Schwelle {thr:.0f} — Schwelle datenbasiert "
+                  f"anheben (src/feasibility.py) + dokumentieren!")
+            ok_env = False
+        else:
+            print(f"      Envelope-Check: max B2B {mx:.0f} km ≤ Schwelle "
+                  f"{thr:.0f} (Reserve {thr - mx:.0f} km) ✓")
+            ok_env = True
+        if not ok_env:
+            return False
     return True
 
 

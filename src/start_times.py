@@ -171,10 +171,15 @@ def find_getaway_contexts(
     reisende Clubs geben; die bindende (längste) In-Flight-Zeit bestimmt
     ``latest_start_min``. Neutrale/internationale Spielorte werden übersprungen.
 
-    Hinweis: Bedingung „visiting Club travels to a home off-day" wird konservativ
-    mit erfasst, sofern der Gast am Folgetag an einem anderen Ort (= seinem Heim)
-    spielt; reine Off-Day-Reisen ohne Folgetag-Spiel sind selten und werden hier
-    bewusst nicht erzwungen (würden die Grenze nur lockern, nie verschärfen).
+    Abdeckung „visiting Club travels to a home off-day" (Runde 2 + Nacht-
+    Härtung): erfasst, wenn der Folgetag offen ist und das NÄCHSTE Spiel des
+    Gasts zu Hause liegt (oder Saisonende = Heimreise sicher). BEWUSSTE
+    RESTLÜCKE: Folgetag offen, aber nächstes Spiel in einer DRITTSTADT — ob der
+    Club dann über sein Heim reist, ist aus dem Plan nicht bestimmbar; diese
+    Fälle werden NICHT erzwungen (Einbeziehen würde die Grenze VERSCHÄRFEN und
+    unbelegbare False-Positives erzeugen — Anm.: ein früherer Kommentar
+    behauptete fälschlich die Gegenrichtung). Gemessene Restmenge real 2024:
+    siehe tests/test_external_data.py::test_vc8_indeterminate_remainder.
     """
     if team_ids is None:
         team_ids = sorted({g.home for g in season.games} | {g.away for g in season.games})

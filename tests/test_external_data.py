@@ -524,3 +524,49 @@ def test_dh_type_survives_sa_roundtrip():
                              OptimizerConfig(iterations=50_000, move_mix_geo=0.35,
                                              seed=42, fatigue_lambda=1e6))
     assert sum(1 for g in out.games if g.dh_type) >= 56
+
+
+# ---------- Nacht-Härtung P2: V(C)(8)-Restmenge + Envelope-Wache ----------
+
+def test_vc8_indeterminate_remainder(tbi):
+    """Quantifiziert die BEWUSSTE V(C)(8)-Restlücke (Doku in
+    find_getaway_contexts): Getaway-Tage, an denen der Gast am Folgetag frei
+    ist, aber sein nächstes Spiel in einer DRITTSTADT liegt (Heimreise nicht
+    bestimmbar → nicht erzwungen). Der Wert wird festgeschrieben, damit eine
+    stille Vergrößerung der Lücke auffällt."""
+    from src.datasources.local_file import LocalFileAdapter
+    from src.start_times import _team_day_sequence
+    s = LocalFileAdapter(base_dir=DATA).fetch_season_schedule(2024)
+    teams = sorted({g.home for g in s.games} | {g.away for g in s.games})
+    indeterminate = 0
+    for t in teams:
+        seq = _team_day_sequence(s, t)
+        for i, dv in enumerate(seq[:-1]):
+            nxt = seq[i + 1]
+            if dv.venue_team == t:
+                continue                     # nur Gast-Faelle
+            if (nxt.day - dv.day).days <= 1:
+                continue                     # kein offener Folgetag
+            if nxt.venue_team in (t, dv.venue_team):
+                continue                     # Heimreise (erfasst) / bleibt
+            indeterminate += 1
+    # GEMESSEN 2026-06-11: exakt 99 unbestimmte Gast-Weiterreisen (real 2024,
+    # deterministisch). Aendert sich der Wert, wurde die Abdeckungslogik oder
+    # die Datenbasis veraendert — dann bewusst neu messen und hier anpassen.
+    assert indeterminate == 99, indeterminate
+
+
+def test_envelope_guard_in_measure_original():
+    """Envelope-Re-Validierung ist fester Schritt der Originalplan-Messung
+    (Assessment-Befund B1: 2026 falsifizierte die alte 4200er-Schwelle):
+    Originalpläne 2024/25 max 4164, 2026 max 4328 — alle ≤ 4350."""
+    from src.feasibility import DEFAULT_THRESHOLDS, feasibility_report
+    assert DEFAULT_THRESHOLDS.max_real_consecutive_km == 4350.0
+    for y, exp_max in ((2024, 4164), (2025, 4164), (2026, 4328)):
+        s = load_retrosheet_schedule(y)
+        team_ids = sorted({g.home for g in s.games})
+        rep = feasibility_report(s, team_ids, _tbi(load_teams()))
+        assert abs(rep.max_consecutive_km - exp_max) < 1.0, (y, rep.max_consecutive_km)
+        assert rep.max_consecutive_km <= 4350.0
+    src = (ROOT / "tools" / "update_external_data.py").read_text(encoding="utf-8")
+    assert "ENVELOPE FALSIFIZIERT" in src    # Wache ist verdrahtet
