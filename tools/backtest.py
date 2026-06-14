@@ -105,17 +105,35 @@ class BacktestResult:
 # B1 — Reale Baseline
 # ====================================================================
 
-def load_real_baseline(season_year: int) -> PlanEvaluation:
-    """Lädt den echten MLB-Plan und bewertet ihn mit unserem Scoring."""
+def _load_input_season(season_year: int, from_original: bool):
+    """Lädt den Eingangsplan eines Backtests.
+
+    ``from_original=False`` (Default): der as-played-Plan aus
+    ``data/mlb_schedule_<jahr>.json`` (vorhanden für 2024/2025).
+    ``from_original=True``: der **publizierte Originalplan** (Retrosheet,
+    Rating A) via ``src.original_schedule.load_original_schedule`` — der echte
+    Produktionsfall (auch 2026, das es als as-played-JSON nicht gibt). Gibt
+    ``(season, quelle)`` zurück.
+    """
+    if from_original:
+        from src.original_schedule import load_original_schedule
+        season, quelle = load_original_schedule(season_year)
+        return season, quelle
     adapter = LocalFileAdapter(base_dir=str(DATA_DIR))
-    season = adapter.fetch_season_schedule(season_year)
+    return adapter.fetch_season_schedule(season_year), "as-played"
+
+
+def load_real_baseline(season_year: int, from_original: bool = False) -> PlanEvaluation:
+    """Lädt den echten MLB-Plan und bewertet ihn mit unserem Scoring."""
+    season, quelle = _load_input_season(season_year, from_original)
     teams = load_teams()
-    logger.info("B1: realer MLB-Plan %s geladen (%d Spiele)", season_year, len(season.games))
+    logger.info("B1: MLB-Plan %s [%s] geladen (%d Spiele)",
+                season_year, quelle, len(season.games))
     bundle = compute_pareto_bundle(season, teams)
     travel = compute_season_travel(season, teams)
     n_dh = sum(1 for g in season.games if g.doubleheader_seq > 0) // 2
     return PlanEvaluation(
-        label=f"MLB-Ist {season_year}",
+        label=f"MLB-{'Original' if from_original else 'Ist'} {season_year}",
         season=season,
         bundle=bundle,
         travel=travel,
@@ -228,6 +246,7 @@ def improve_real_plan(
     *,
     legacy_bitident: bool = False,
     allow_unpublishable: bool = False,
+    from_original: bool = False,
 ) -> PlanEvaluation:
     """Nimmt den echten MLB-Plan als Startpunkt und optimiert ihn mit unserem
     SA-Optimizer (Geo-Move). Realistischer Produktionsfall: fuer eine neue Saison
@@ -247,8 +266,7 @@ def improve_real_plan(
     from src.publish_gate import publishable_report, UnpublishableScheduleError
     from src.data_loader import teams_by_id as _tbi
 
-    adapter = LocalFileAdapter(base_dir=str(DATA_DIR))
-    real = adapter.fetch_season_schedule(season_year)
+    real, _quelle = _load_input_season(season_year, from_original)
     teams = load_teams()
     asb = _detect_all_star_break(real)
     # Review-Runde 2 (Punkt 2): VENUE-AVAIL aktiv im Produktionslauf — Stadion-
@@ -318,7 +336,8 @@ def improve_real_plan(
     n_dh = sum(1 for g in improved.games if g.doubleheader_seq > 0) // 2
     logger.info("Warm-Start fertig in %.1fs", elapsed)
     return PlanEvaluation(
-        label=f"Optimizer (Warm-Start) {season_year}{label_suffix}",
+        label=(f"Optimizer ({'From-Original' if from_original else 'Warm-Start'}) "
+               f"{season_year}{label_suffix}"),
         season=improved,
         bundle=bundle,
         travel=travel,
@@ -669,14 +688,16 @@ def run(season_year: int, seed: int, solver_time: float,
         out_dir: Optional[Path] = None,
         legacy_bitident: bool = False,
         allow_unpublishable: bool = False,
-        mode: str = "publizierbar") -> BacktestResult:
-    baseline = load_real_baseline(season_year)
+        mode: str = "publizierbar",
+        from_original: bool = False) -> BacktestResult:
+    baseline = load_real_baseline(season_year, from_original=from_original)
     ours = None
     if not baseline_only:
-        if warm_start:
+        if warm_start or from_original:
             ours = improve_real_plan(season_year, seed=seed,
                                      legacy_bitident=legacy_bitident,
-                                     allow_unpublishable=allow_unpublishable)
+                                     allow_unpublishable=allow_unpublishable,
+                                     from_original=from_original)
         else:
             ours = generate_our_plan(season_year, seed=seed, solver_time=solver_time,
                                      enable_lns_repair=enable_lns_repair)
@@ -699,7 +720,7 @@ def run(season_year: int, seed: int, solver_time: float,
             from src.run_report import write_run_artifacts
             paths = write_run_artifacts(
                 ours.season, out_dir, f"backtest_{season_year}_ours",
-                baseline=(baseline.season if warm_start else None),
+                baseline=(baseline.season if (warm_start or from_original) else None),
                 mode=mode)
             logger.info("Compliance-Artefakte: %s / %s", paths["json"], paths["md"])
         except Exception as exc:
@@ -715,8 +736,13 @@ def main() -> int:
     p.add_argument("--baseline-only", action="store_true", help="Nur B1 (reale Baseline) bewerten")
     p.add_argument("--lns-repair", action="store_true", help="AC-2.1.8 LNS-Repair aktivieren (langsamer)")
     p.add_argument("--warm-start", action="store_true",
-                   help="Den realen Plan als Startpunkt nehmen und optimieren "
-                        "(schlaegt den realen Plan; realistischer Produktionsfall)")
+                   help="Den realen (as-played) Plan als Startpunkt nehmen und "
+                        "optimieren (realistischer Produktionsfall)")
+    p.add_argument("--from-original", action="store_true",
+                   help="HEADLINE-WORKFLOW: den PUBLIZIERTEN Originalplan "
+                        "(Retrosheet, Rating A; auch 2026) laden → optimieren → "
+                        "Publish-Gate → Δkm + Compliance-Report. Erstklassiger, "
+                        "getesteter Entry-Point (test_from_original_headline).")
     p.add_argument("--mode", choices=("publizierbar", "forschung"),
                    default="publizierbar",
                    help="Betriebsmodus (Review-Runde 2, Punkt 6): 'publizierbar' "
@@ -733,7 +759,7 @@ def main() -> int:
     run(args.season, args.seed, args.solver_time, args.baseline_only, args.lns_repair,
         warm_start=args.warm_start, legacy_bitident=args.legacy_bitident,
         allow_unpublishable=(args.allow_unpublishable or args.mode == "forschung"),
-        mode=args.mode)
+        mode=args.mode, from_original=args.from_original)
     return 0
 
 
