@@ -165,12 +165,33 @@ class OptimizerConfig:
     # und m0 der Startwert (Warm-Start auf as-played-Daten traegt Artefakte,
     # die der SA nicht beheben muss — Gate-Kriterium ist "keine NEUEN
     # Verstoesse"). Zusaetzlich wird die Best-Loesung nur aus Zustaenden mit
-    # Penalty 0 uebernommen (Best-Filter) → der SA-Output besteht das
-    # Publish-Gate fuer V(C)(13) per Konstruktion. Mit ~1e6 wirkt der Term wie
-    # ein harter Guard (analog fatigue_lambda). DEFAULT 0.0 → kein Zusatz-
-    # Compute, bit-identisch (Dataclass-Kontrakt). Produktionspfade nutzen
-    # production_optimizer_config().
+    # Penalty 0 uebernommen (Best-Filter). Mit ~1e6 wirkt der Term wie ein
+    # harter Guard (analog fatigue_lambda).
+    #
+    # WICHTIG — KEINE Garantie "per Konstruktion": Der Penalty *senkt* die
+    # Verstoss-Wahrscheinlichkeit drastisch, garantiert Konformitaet aber NICHT
+    # aus sich heraus. Er misst V(C)(13) relativ zu ``_s13_asb`` (dem All-Star-
+    # Break); bei FALSCHEM oder fehlendem ASB optimiert der SA gegen das falsche
+    # Modell und erzeugt sehr wohl neue Verstoesse (gemessen: ~29 auf dem
+    # 2026-Original bei ASB=None, scheinbar besser mit -2,31 %% statt -1,7 %%,
+    # weil Verstoesse km sparen). Die EINZIGE harte Garantie ist die Ablehnung
+    # durch das Publish-Gate (publish_gate.publishable_report, baseline=Input)
+    # PLUS ausreichend Iterationen. Korrekte Formel also: "Konformitaet durch
+    # Gate-Ablehnung + ausreichende Iterationen", nicht "per Konstruktion".
+    # Gegen die ASB-Fehlbedienung schuetzt zusaetzlich der Guard in
+    # production_optimizer_config() (Finalisierung Punkt 3).
+    # DEFAULT 0.0 → kein Zusatz-Compute, bit-identisch (Dataclass-Kontrakt).
+    # Produktionspfade nutzen production_optimizer_config().
     sched13_lambda: float = 0.0
+    # ---- Finalisierung Punkt 3: ASB-Fehlbedienungs-Guard ----
+    # Der V(C)(13)-Penalty misst relativ zum All-Star-Break. Fehlt/falsch der
+    # ASB, optimiert er gegen das falsche Modell und laesst still neue Verstoesse
+    # durch (gemessen ~29 auf 2026-Original bei ASB=None — scheinbar besser, weil
+    # Verstoesse km sparen). Ist dieser Schalter True (Produktions-Default), bricht
+    # optimize_travel FRUEH ab, wenn sched13_lambda>0 aber kein plausibler ASB im
+    # Saisonfenster liegt — statt den Fehler erst dem Gate zu ueberlassen.
+    # DEFAULT False → Verhalten/Bit-Identitaet unveraendert.
+    require_all_star_break: bool = False
 
 
 # ====================================================================
@@ -203,14 +224,21 @@ def production_optimizer_config(**overrides) -> "OptimizerConfig":
     """OptimizerConfig mit AKTIVEN Regel-Schutztermen (Produktions-Default).
 
     Gemessen (2026-06-10, real 2024, 3–6 M Iter, Seed 42): kostet keine km
-    (−4,94 % mit Gates vs. −4,88 % ohne) und eliminiert die harten Verstoesse.
-    Siehe docs/REVIEW_2026-06-10_INDEPENDENT_AI.md (P0-1).
+    (−4,94 % mit Gates vs. −4,88 % ohne) und senkt die Verstoesse drastisch.
+    WICHTIG: Diese Terme machen den Output NICHT "konform per Konstruktion" —
+    bei falschem/fehlendem All-Star-Break optimiert der V(C)(13)-Term gegen das
+    falsche Modell und laesst neue Verstoesse durch (gemessen ~29 auf dem
+    2026-Original mit ASB=None). Die harte Garantie ist erst das Publish-Gate
+    (publishable_report) PLUS ausreichend Iterationen; der ASB-Guard unten faengt
+    die Fehlbedienung frueh ab. Siehe docs/REVIEW_2026-06-10_INDEPENDENT_AI.md
+    (P0-1) und docs/FINALIZATION.md (Punkte 2+3).
     """
     base = dict(
         fatigue_lambda=PRODUCTION_FATIGUE_LAMBDA,
         feas_lambda=PRODUCTION_FEAS_LAMBDA,
         feas_w_ptet=PRODUCTION_FEAS_W_PTET,
         sched13_lambda=PRODUCTION_SCHED13_LAMBDA,
+        require_all_star_break=True,  # Punkt-3-Guard: ASB-Fehlbedienung früh kippen
     )
     base.update(overrides)
     return OptimizerConfig(**base)
@@ -1078,6 +1106,25 @@ def optimize_travel(season: Season, teams: List[Team], cfg: GeneratorConfig,
             while _d <= cfg.all_star_break[1]:
                 _s13_asb.add((_d - cfg.season_start).days)
                 _d += timedelta(days=1)
+        # ---- Finalisierung Punkt 3: ASB-Fehlbedienungs-Guard ----
+        # Wenn der Produktions-Default das verlangt (require_all_star_break),
+        # FRUEH abbrechen statt still gegen das falsche V(C)(13)-Modell zu
+        # optimieren. Geprueft: ASB gesetzt UND mindestens ein ASB-Tag faellt
+        # plausibel ins Saisonfenster (sonst mappt _s13_asb auf nichts).
+        if opt_cfg.require_all_star_break:
+            _season_len = (cfg.season_end - cfg.season_start).days
+            _asb_in_window = any(0 <= d <= _season_len for d in _s13_asb)
+            if not cfg.all_star_break or not _asb_in_window:
+                raise ValueError(
+                    "ASB-Guard (Finalisierung Punkt 3): sched13_lambda>0 mit "
+                    "Produktions-Config, aber kein plausibler All-Star-Break im "
+                    f"Saisonfenster (all_star_break={cfg.all_star_break!r}, "
+                    f"season {cfg.season_start}..{cfg.season_end}). Der "
+                    "V(C)(13)-Penalty wuerde gegen ein falsches Modell optimieren "
+                    "und still neue Verstoesse erzeugen. Korrekten ASB setzen "
+                    "(z. B. src.season.detect_all_star_break) oder den Guard "
+                    "bewusst per OptimizerConfig(require_all_star_break=False) "
+                    "deaktivieren.")
         team_s13: Dict[str, int] = {
             tid: _team_sched13_violations(tid, entries, team_idx, _s13_asb)
             for tid in team_idx
