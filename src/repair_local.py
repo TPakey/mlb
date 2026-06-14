@@ -120,6 +120,36 @@ def _streak_if_added(play_days: Set[date], d: date) -> int:
 VC12_STREAK_LIMIT = 20
 VC12_RESCHEDULE_LIMIT = 24
 
+# Nacht-Härtung 2026-06-12 (Schwachstellensuche, Fund C): Makeups muessen den
+# harten Venue-Belegungskalender (Co-Tenant/Konzerte, data/local_events.json)
+# respektieren — vorher legte der Slot-Finder ein OAK-Makeup auf einen
+# River-Cats-Heimtag (gemessen; das Orchestrator-Gate fing es zwar, aber die
+# Strategie scheiterte damit unnoetig statt korrekt auszuweichen).
+_VENUE_BOOKED_CACHE: list = []
+
+
+def _venue_booked_dates() -> Dict[str, Set[date]]:
+    """Heimteam -> belegte Stadiontage (stadium_bookings); prozessweit gecacht,
+    robust (Ladefehler -> leer + Warnung, Repair darf daran nie sterben)."""
+    if not _VENUE_BOOKED_CACHE:
+        booked: Dict[str, Set[date]] = {}
+        try:
+            from .event_conflicts import load_local_events
+            for e in load_local_events():
+                if not e.is_stadium_booking():
+                    continue
+                d = e.start_date
+                while d <= e.end_date:
+                    for t in e.team_ids:
+                        booked.setdefault(t, set()).add(d)
+                    d += timedelta(days=1)
+        except Exception as exc:  # pragma: no cover
+            import warnings
+            warnings.warn(f"Venue-Kalender nicht ladbar ({exc!r}) — "
+                          f"Repair ohne Belegungs-Check!", RuntimeWarning)
+        _VENUE_BOOKED_CACHE.append(booked)
+    return _VENUE_BOOKED_CACHE[0]
+
 
 def _find_next_free_slot(
     game: Game,
@@ -157,6 +187,10 @@ def _find_next_free_slot(
             continue
         if (_streak_if_added(occupied.get(game.home, set()), cur) > max_streak
                 or _streak_if_added(occupied.get(game.away, set()), cur) > max_streak):
+            cur += timedelta(days=1)
+            continue
+        # Fund C: Stadion an dem Tag durch Dritte belegt (Co-Tenant/Konzert)?
+        if cur in _venue_booked_dates().get(game.home, ()):
             cur += timedelta(days=1)
             continue
         return cur
