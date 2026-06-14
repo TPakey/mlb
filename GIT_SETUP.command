@@ -17,10 +17,13 @@ fi
 # kaputtes Sandbox-.git entsorgen (auf dem Mac normal löschbar):
 rm -rf .git .git_broken_sandbox_DELETE_ME 2>/dev/null
 
-BUNDLE="night-haertung-2026-06-11.bundle"
-if [ ! -f "$BUNDLE" ]; then
-  echo "❌ $BUNDLE nicht gefunden."; read -r -p "Enter..." _; exit 1
+# Neuesten Bundle automatisch waehlen (Finalisierung 2026-06-14: das neue Bundle
+# enthaelt zusaetzlich die Headline-/Guard-/Anker-Commits).
+BUNDLE="$(ls -t *.bundle 2>/dev/null | head -1)"
+if [ -z "$BUNDLE" ] || [ ! -f "$BUNDLE" ]; then
+  echo "❌ Kein .bundle gefunden."; read -r -p "Enter..." _; exit 1
 fi
+echo "→ Verwende Bundle: $BUNDLE"
 
 git init -b main >/dev/null && \
 git remote add bundle "$BUNDLE" && \
